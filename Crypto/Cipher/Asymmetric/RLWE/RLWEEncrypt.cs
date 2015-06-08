@@ -55,7 +55,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     /// RLWEKeyGenerator keyGen = new RLWEKeyGenerator(encParams);
     /// IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
     /// 
-    /// byte[] data = new byte[100];
+    /// byte[] data = new byte[64];
     /// byte[] enc, dec;
     /// 
     /// // encrypt an array

@@ -190,7 +190,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="OId">Three bytes that uniquely identify the parameter set</param>
         /// <param name="Engine">The PRNG engine used to power SecureRandom</param>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if <c>N</c> or <c>Q/c> are invalid</exception>
+        /// <exception cref="System.ArgumentException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
         public RLWEParameters(byte[] OId, Prngs Engine = Prngs.CSPRng) :
             this(DEFAULT_N, DEFAULT_Q, DEFAULT_SIGMA, OId)
         {

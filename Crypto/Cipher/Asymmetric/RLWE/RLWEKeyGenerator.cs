@@ -85,7 +85,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// </summary>
         /// 
         /// <param name="CiphersParams">The RLWEParameters instance containing thecipher settings</param>
-        /// <param name="OID">The unique id of these keys</param>
         public RLWEKeyGenerator(RLWEParameters CiphersParams)
         {
             if (CiphersParams.RandomEngine == Prngs.PSBPrng)

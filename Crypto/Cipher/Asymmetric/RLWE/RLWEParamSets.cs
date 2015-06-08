@@ -66,7 +66,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     {
         #region Enums
         /// <summary>
-        /// Set id is defined as: N: coefficients, Q: Modulus</para>
+        /// Set id is defined as: N: coefficients, Q: Modulus
         /// </summary>
         public enum RLWEParamNames : int
         {

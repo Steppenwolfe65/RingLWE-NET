@@ -352,7 +352,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <summary>
         /// Remove an element from the array
         /// </summary>
-        /// <typeparam name="T">The type of array</typeparam>
+        /// 
         /// <param name="Source">The source array</param>
         /// <param name="Index">The index of the element to remove</param>
         public static void RemoveAt(ref byte[] Source, int Index)
@@ -370,7 +370,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <summary>
         /// Remove an element from the array
         /// </summary>
-        /// <typeparam name="T">The type of array</typeparam>
+        /// 
         /// <param name="Source">The source array</param>
         /// <param name="Index">The index of the element to remove</param>
         public static void RemoveAt(ref int[] Source, int Index)
@@ -388,7 +388,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
         /// <summary>
         /// Remove an element from the array
         /// </summary>
-        /// <typeparam name="T">The type of array</typeparam>
+        /// 
         /// <param name="Source">The source array</param>
         /// <param name="Index">The index of the element to remove</param>
         public static void RemoveAt(ref long[] Source, int Index)

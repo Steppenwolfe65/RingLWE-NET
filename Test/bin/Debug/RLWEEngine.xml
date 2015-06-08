@@ -426,6 +426,166 @@
             Get: Algorithm Name
             </summary>
         </member>
+        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign">
+             <summary>
+             An Ring-LWE One Time Sign (OTS) message sign and verify implementation
+             </summary>
+             
+             <example>
+             <description>Example of using the signing and verifying an array:</description>
+             <code>
+             RLWEParameters encParams = RLWEParamSets.RLWEN256Q768;
+             RLWEKeyGenerator keyGen = new RLWEKeyGenerator(encParams);
+             IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
+             byte[] code;
+             byte[] data = new byte[100];
+            
+             // get the message code for an array of bytes
+             using (RLWESign signer = new RLWESign(encParams))
+             {
+                 signer.Initialize(keyPair);
+                 code = signer.Sign(data, 0, data.Length);
+             }
+            
+             // test the message for validity
+             using (RLWESign signer = new RLWESign(encParams))
+             {
+                 signer.Initialize(keyPair);
+                 bool valid = signer.Verify(data, 0, data.Length, code);
+             }
+             </code>
+             </example>
+             
+             <revisionHistory>
+                 <revision date="2015/06/07" version="1.4.0.0">Initial release</revision>
+             </revisionHistory>
+             
+             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE RLWEPublicKey Class</seealso>
+             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE RLWEPrivateKey Class</seealso>
+             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Interface</seealso>
+             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKey Interface</seealso>
+             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
+             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto Digests Enumeration</seealso>
+             
+             <remarks>
+             <description><h4>Implementation Notes:</h4></description>
+             <list type="bullet">
+             <item><description>Signing is intended as a one time only key implementation (OTS); keys should never be re-used.</description></item>
+             <item><description>Digests can be any of the implemented digests; Blake, Keccak, SHA-2 or Skein.</description></item>
+             </list>
+             
+             <description><h4>Code Base Guides:</h4></description>
+             <list type="table">
+             <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">version</see>.</description></item>
+             </list> 
+             </remarks>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.#ctor(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters,VTDev.Libraries.CEXEngine.Crypto.Digests)">
+            <summary>
+            Initialize this class
+            </summary>
+            
+            <param name="CipherParams">The RLWE cipher used to encrypt the hash</param>
+            <param name="Digest">The type of digest engine used</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Finalize">
+            <summary>
+            Finalize objects
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Initialize(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair)">
+            <summary>
+            Initialize the cipher
+            </summary>
+            
+            <param name="KeyPair">The <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair"/> containing the RLWE public or private key</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Reset">
+            <summary>
+            Reset the underlying digest engine
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Sign(System.IO.Stream)">
+            <summary>
+            Get the signing code for a stream
+            </summary>
+            
+            <param name="InputStream">The stream contining the data</param>
+            
+            <returns>The encrypted hash code</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Sign(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Get the signing code for a stream
+            </summary>
+            
+            <param name="Input">The byte array contining the data</param>
+            <param name="Offset">The starting offset within the Input array</param>
+            <param name="Length">The number of bytes to process</param>
+            
+            <returns>The encrypted hash code</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Verify(System.IO.Stream,System.Byte[])">
+            <summary>
+            Test the hashed value of a stream against the decrypted code
+            </summary>
+            
+            <param name="InputStream">The stream containing the data to test</param>
+            <param name="Code">The encrypted hash code</param>
+            
+            <returns>Returns <c>true</c> if the codes match</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Verify(System.Byte[],System.Int32,System.Int32,System.Byte[])">
+            <summary>
+            Test the hashed value of a stream against the decrypted code
+            </summary>
+            
+            <param name="Input">The stream containing the data to test</param>
+            <param name="Offset">The starting offset within the Input array</param>
+            <param name="Length">The number of bytes to process</param>
+            <param name="Code">The encrypted hash code</param>
+            
+            <returns>Returns <c>true</c> if the codes match</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Compute(System.IO.Stream)">
+            <summary>
+            Compute the hash from a stream
+            </summary>
+            
+            <param name="InputStream">The input stream</param>
+            
+            <returns>The hash value</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Compute(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Compute the hash from a byte array
+            </summary>
+            
+            <param name="Input">The data byte array</param>
+            <param name="Offset">The starting offset within the array</param>
+            <param name="Length">The number of bytes to process</param>
+            
+            <returns>The hash value</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.GetDigest(VTDev.Libraries.CEXEngine.Crypto.Digests)">
+            <summary>
+            Get the digest engine
+            </summary>
+            
+            <param name="Engine">Engine type</param>
+            
+            <returns>Instance of digest</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Dispose">
+            <summary>
+            Dispose of this class
+            </summary>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.MaxPlainText">
+            <summary>
+            Get: The maximum number of bytes the cipher can decrypt
+            </summary>
+        </member>
         <member name="T:VTDev.Libraries.CEXEngine.Utility.IntUtils">
             <summary>
             An integer utilities class
@@ -1273,7 +1433,7 @@
             <summary>
             Remove an element from the array
             </summary>
-            <typeparam name="T">The type of array</typeparam>
+            
             <param name="Source">The source array</param>
             <param name="Index">The index of the element to remove</param>
         </member>
@@ -1281,7 +1441,7 @@
             <summary>
             Remove an element from the array
             </summary>
-            <typeparam name="T">The type of array</typeparam>
+            
             <param name="Source">The source array</param>
             <param name="Index">The index of the element to remove</param>
         </member>
@@ -1289,7 +1449,7 @@
             <summary>
             Remove an element from the array
             </summary>
-            <typeparam name="T">The type of array</typeparam>
+            
             <param name="Source">The source array</param>
             <param name="Index">The index of the element to remove</param>
         </member>
@@ -1807,7 +1967,11 @@
             <para>Security:256, MaxText:64, N:512 Q:12289, S:12.18, PublicKey Size:2060, PrivateKey Size:1032</para>
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParamSets.RLWEParamNames" -->
+        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParamSets.RLWEParamNames">
+            <summary>
+            Set id is defined as: N: coefficients, Q: Modulus
+            </summary>
+        </member>
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParamSets.RLWEParamNames.N256Q7681">
             <summary>
             Low security; uses CSPRng as the default Prng.
@@ -2127,6 +2291,40 @@
             <summary>
             Get: Returns the private key parameters
             </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.#ctor(VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom)">
+            <summary>
+            Initialize this class
+            </summary>
+            
+            <param name="Rand">The secure random number generator instance</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.Decrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey,System.Byte[])">
+            <summary>
+            Decrypt a ciphertext
+            </summary>
+            
+            <param name="PrivateKey">The RLWE private key</param>
+            <param name="Message">The encrypted message</param>
+            
+            <returns>The decrypted message</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.Encrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey,System.Byte[])">
+            <summary>
+            Encrypt a message
+            </summary>
+            
+            <param name="PublicKey">The RLWE public key</param>
+            <param name="Message">The message array to encrypt</param>
+            
+            <returns>The encrypted message</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.Generate">
+            <summary>
+            Generate a RLWE key pair
+            </summary>
+            
+            <returns>An initialized RLWE KeyPair</returns>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Numeric.RoundingModes">
             <summary>
@@ -2738,7 +2936,16 @@
             The default sigma value
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters.#ctor(System.Byte[],VTDev.Libraries.CEXEngine.Crypto.Prngs)" -->
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters.#ctor(System.Byte[],VTDev.Libraries.CEXEngine.Crypto.Prngs)">
+            <summary>
+            Set the default parameters (N:512, Q:12289, Sigma:12.18)
+            </summary>
+            
+            <param name="OId">Three bytes that uniquely identify the parameter set</param>
+            <param name="Engine">The PRNG engine used to power SecureRandom</param>
+            
+            <exception cref="T:System.ArgumentException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
+        </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters.#ctor(System.Int32,System.Int32,System.Double,System.Byte[],System.Int32,VTDev.Libraries.CEXEngine.Crypto.Prngs)">
             <summary>
             Initialize this class
@@ -3555,6 +3762,40 @@
             <summary>
             Get: The Digest name
             </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.#ctor(VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom)">
+            <summary>
+            Initialize this class
+            </summary>
+            
+            <param name="SecRand">The secure random number generator instance</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.Decrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey,System.Byte[])">
+            <summary>
+            Decrypt a ciphertext
+            </summary>
+            
+            <param name="PrivateKey">The RLWE private key</param>
+            <param name="Message">The encrypted message</param>
+            
+            <returns>The decrypted message</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.Encrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey,System.Byte[])">
+            <summary>
+            Encrypt a message
+            </summary>
+            
+            <param name="PublicKey">The RLWE public key</param>
+            <param name="Message">The message array to encrypt</param>
+            
+            <returns>The encrypted message</returns>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.Generate">
+            <summary>
+            Generate a RLWE key pair
+            </summary>
+            
+            <returns>An initialized RLWE KeyPair</returns>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Crypto.Prng.CCG">
             <summary>
@@ -7036,7 +7277,7 @@
             RLWEKeyGenerator keyGen = new RLWEKeyGenerator(encParams);
             IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
             
-            byte[] data = new byte[100];
+            byte[] data = new byte[64];
             byte[] enc, dec;
             
             // encrypt an array
@@ -7159,6 +7400,48 @@
         <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEEncrypt.MaxPlainText">
             <summary>
             Get: The maximum number of bytes the cipher can decrypt
+            </summary>
+        </member>
+        <member name="T:VTDev.Libraries.CEXEngine.Utility.ParallelUtils">
+            <summary>
+            This class is a utility class for parallel processing
+            <para>http://blogs.msdn.com/b/pfxteam/archive/2009/08/12/9867246.aspx</para>
+            </summary>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.Loop(System.Threading.Tasks.ParallelOptions,System.Func{System.Boolean},System.Action{System.Threading.Tasks.ParallelLoopState})">
+            <summary>
+            An infinite parallel loop function
+            </summary>
+            
+            <param name="Options">The parallel options</param>
+            <param name="Condition">The while conditional</param>
+            <param name="Body">The functions body</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.While(System.Threading.Tasks.ParallelOptions,System.Func{System.Boolean},System.Action{System.Threading.Tasks.ParallelLoopState})">
+            <summary>
+            A parallel While function
+            </summary>
+            
+            <param name="Options">The parallel options</param>
+            <param name="Condition">The while conditional</param>
+            <param name="Body">The functions body</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.While(System.Func{System.Boolean},System.Action)">
+            <summary>
+            A parallel While function
+            </summary>
+            
+            <param name="Condition">The while conditional</param>
+            <param name="Body">The functions body</param>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.ForceLinear">
+            <summary>
+            Get/Set: Force uni-processing (IsParallel returns false)
+            </summary>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.IsParallel">
+            <summary>
+            Get: Returns true for multi processor system
             </summary>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Numeric.Logical">
@@ -9176,7 +9459,6 @@
             </summary>
             
             <param name="CiphersParams">The RLWEParameters instance containing thecipher settings</param>
-            <param name="OID">The unique id of these keys</param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEKeyGenerator.GenerateKeyPair">
             <summary>
@@ -10214,276 +10496,6 @@
         <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey.N">
             <summary>
             Get: Returns the number of coefficients
-            </summary>
-        </member>
-        <member name="T:VTDev.Libraries.CEXEngine.Utility.ParallelUtils">
-            <summary>
-            This class is a utility class for parallel processing
-            <para>http://blogs.msdn.com/b/pfxteam/archive/2009/08/12/9867246.aspx</para>
-            </summary>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.Loop(System.Threading.Tasks.ParallelOptions,System.Func{System.Boolean},System.Action{System.Threading.Tasks.ParallelLoopState})">
-            <summary>
-            An infinite parallel loop function
-            </summary>
-            
-            <param name="Options">The parallel options</param>
-            <param name="Condition">The while conditional</param>
-            <param name="Body">The functions body</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.While(System.Threading.Tasks.ParallelOptions,System.Func{System.Boolean},System.Action{System.Threading.Tasks.ParallelLoopState})">
-            <summary>
-            A parallel While function
-            </summary>
-            
-            <param name="Options">The parallel options</param>
-            <param name="Condition">The while conditional</param>
-            <param name="Body">The functions body</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.While(System.Func{System.Boolean},System.Action)">
-            <summary>
-            A parallel While function
-            </summary>
-            
-            <param name="Condition">The while conditional</param>
-            <param name="Body">The functions body</param>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.ForceLinear">
-            <summary>
-            Get/Set: Force uni-processing (IsParallel returns false)
-            </summary>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Utility.ParallelUtils.IsParallel">
-            <summary>
-            Get: Returns true for multi processor system
-            </summary>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.#ctor(VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom)">
-            <summary>
-            Initialize this class
-            </summary>
-            
-            <param name="Rand">The secure random number generator instance</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.Decrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey,System.Byte[])">
-            <summary>
-            Decrypt a ciphertext
-            </summary>
-            
-            <param name="PrivateKey">The RLWE private key</param>
-            <param name="Message">The encrypted message</param>
-            
-            <returns>The decrypted message</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.Encrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey,System.Byte[])">
-            <summary>
-            Encrypt a message
-            </summary>
-            
-            <param name="PublicKey">The RLWE public key</param>
-            <param name="Message">The message array to encrypt</param>
-            
-            <returns>The encrypted message</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT512.Generate">
-            <summary>
-            Generate a RLWE key pair
-            </summary>
-            
-            <returns>An initialized RLWE KeyPair</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.#ctor(VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom)">
-            <summary>
-            Initialize this class
-            </summary>
-            
-            <param name="SecRand">The secure random number generator instance</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.Decrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey,System.Byte[])">
-            <summary>
-            Decrypt a ciphertext
-            </summary>
-            
-            <param name="PrivateKey">The RLWE private key</param>
-            <param name="Message">The encrypted message</param>
-            
-            <returns>The decrypted message</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.Encrypt(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey,System.Byte[])">
-            <summary>
-            Encrypt a message
-            </summary>
-            
-            <param name="PublicKey">The RLWE public key</param>
-            <param name="Message">The message array to encrypt</param>
-            
-            <returns>The encrypted message</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra.NTT256.Generate">
-            <summary>
-            Generate a RLWE key pair
-            </summary>
-            
-            <returns>An initialized RLWE KeyPair</returns>
-        </member>
-        <member name="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign">
-             <summary>
-             An Ring-LWE One Time Sign (OTS) message sign and verify implementation
-             </summary>
-             
-             <example>
-             <description>Example of using the signing and verifying an array:</description>
-             <code>
-             RLWEParameters encParams = RLWEParamSets.RLWEN256Q768;
-             RLWEKeyGenerator keyGen = new RLWEKeyGenerator(encParams);
-             IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
-             byte[] code;
-             byte[] data = new byte[100];
-            
-             // get the message code for an array of bytes
-             using (RLWESign signer = new RLWESign(encParams))
-             {
-                 signer.Initialize(keyPair);
-                 code = signer.Sign(data, 0, data.Length);
-             }
-            
-             // test the message for validity
-             using (RLWESign signer = new RLWESign(encParams))
-             {
-                 signer.Initialize(keyPair);
-                 bool valid = signer.Verify(data, 0, data.Length, code);
-             }
-             </code>
-             </example>
-             
-             <revisionHistory>
-                 <revision date="2015/06/07" version="1.4.0.0">Initial release</revision>
-             </revisionHistory>
-             
-             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE RLWEPublicKey Class</seealso>
-             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE RLWEPrivateKey Class</seealso>
-             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Interface</seealso>
-             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKey Interface</seealso>
-             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-             <seealso cref="T:VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto Digests Enumeration</seealso>
-             
-             <remarks>
-             <description><h4>Implementation Notes:</h4></description>
-             <list type="bullet">
-             <item><description>Signing is intended as a one time only key implementation (OTS); keys should never be re-used.</description></item>
-             <item><description>Digests can be any of the implemented digests; Blake, Keccak, SHA-2 or Skein.</description></item>
-             </list>
-             
-             <description><h4>Code Base Guides:</h4></description>
-             <list type="table">
-             <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">version</see>.</description></item>
-             </list> 
-             </remarks>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.#ctor(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters,VTDev.Libraries.CEXEngine.Crypto.Digests)">
-            <summary>
-            Initialize this class
-            </summary>
-            
-            <param name="CipherParams">The RLWE cipher used to encrypt the hash</param>
-            <param name="Digest">The type of digest engine used</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Finalize">
-            <summary>
-            Finalize objects
-            </summary>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Initialize(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair)">
-            <summary>
-            Initialize the cipher
-            </summary>
-            
-            <param name="KeyPair">The <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair"/> containing the RLWE public or private key</param>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Reset">
-            <summary>
-            Reset the underlying digest engine
-            </summary>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Sign(System.IO.Stream)">
-            <summary>
-            Get the signing code for a stream
-            </summary>
-            
-            <param name="InputStream">The stream contining the data</param>
-            
-            <returns>The encrypted hash code</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Sign(System.Byte[],System.Int32,System.Int32)">
-            <summary>
-            Get the signing code for a stream
-            </summary>
-            
-            <param name="Input">The byte array contining the data</param>
-            <param name="Offset">The starting offset within the Input array</param>
-            <param name="Length">The number of bytes to process</param>
-            
-            <returns>The encrypted hash code</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Verify(System.IO.Stream,System.Byte[])">
-            <summary>
-            Test the hashed value of a stream against the decrypted code
-            </summary>
-            
-            <param name="InputStream">The stream containing the data to test</param>
-            <param name="Code">The encrypted hash code</param>
-            
-            <returns>Returns <c>true</c> if the codes match</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Verify(System.Byte[],System.Int32,System.Int32,System.Byte[])">
-            <summary>
-            Test the hashed value of a stream against the decrypted code
-            </summary>
-            
-            <param name="Input">The stream containing the data to test</param>
-            <param name="Offset">The starting offset within the Input array</param>
-            <param name="Length">The number of bytes to process</param>
-            <param name="Code">The encrypted hash code</param>
-            
-            <returns>Returns <c>true</c> if the codes match</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Compute(System.IO.Stream)">
-            <summary>
-            Compute the hash from a stream
-            </summary>
-            
-            <param name="InputStream">The input stream</param>
-            
-            <returns>The hash value</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Compute(System.Byte[],System.Int32,System.Int32)">
-            <summary>
-            Compute the hash from a byte array
-            </summary>
-            
-            <param name="Input">The data byte array</param>
-            <param name="Offset">The starting offset within the array</param>
-            <param name="Length">The number of bytes to process</param>
-            
-            <returns>The hash value</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.GetDigest(VTDev.Libraries.CEXEngine.Crypto.Digests)">
-            <summary>
-            Get the digest engine
-            </summary>
-            
-            <param name="Engine">Engine type</param>
-            
-            <returns>Instance of digest</returns>
-        </member>
-        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Dispose">
-            <summary>
-            Dispose of this class
-            </summary>
-        </member>
-        <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.MaxPlainText">
-            <summary>
-            Get: The maximum number of bytes the cipher can decrypt
             </summary>
         </member>
     </members>
