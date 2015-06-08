@@ -59,9 +59,9 @@ namespace Test
                 if (Debugger.IsAttached) 
                     Console.WriteLine("You are running in Debug mode! Compiled times will be much faster..");
 
-                KeyGenSpeed(1000);
-                EncryptionSpeed(1000);
-                DecryptionSpeed(1000);
+                KeyGenSpeed(CYCLE_COUNT);
+                EncryptionSpeed(CYCLE_COUNT);
+                DecryptionSpeed(CYCLE_COUNT);
                 Console.WriteLine("Speed Tests Completed!");
                 Console.WriteLine("");
                 Console.WriteLine("");
@@ -126,7 +126,7 @@ namespace Test
         #endregion
 
         #region Timing Tests
-        static void CycleTest(int Iterations = 1000)
+        static void CycleTest(int Iterations)
         {
             Stopwatch runTimer = new Stopwatch();
             runTimer.Start();
@@ -135,30 +135,30 @@ namespace Test
             runTimer.Stop();
 
             double elapsed = runTimer.Elapsed.TotalMilliseconds;
-            string ft = TimeSpan.FromMilliseconds(elapsed).ToString(@"m\:ss\.ffff");
-            Console.WriteLine(string.Format("{0} cycles completed in: {1} s", Iterations, ft));
+            Console.WriteLine(string.Format("{0} cycles completed in: {1} ms", Iterations, elapsed));
             Console.WriteLine(string.Format("Average cycle time: {0} ms", elapsed / Iterations));
             Console.WriteLine("");
         }
 
-        static void DecryptionSpeed(int Iterations = 1000)
+        static void DecryptionSpeed(int Iterations)
         {
             Console.WriteLine(string.Format("******Looping Decryption Test: Testing {0} Iterations******", Iterations));
             Console.WriteLine("Test decryption times using the RLWEN512Q12289 parameter set.");
 
-            // decrypt and verify
-            string tm = RDecrypt().ToString();
-            Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, tm));
+            double elapsed = RDecrypt(Iterations);
+            Console.WriteLine(string.Format("{0} decryption cycles completed in: {1} ms", Iterations, elapsed));
+            Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
             Console.WriteLine("");
         }
 
-        static void EncryptionSpeed(int Iterations = 1000)
+        static void EncryptionSpeed(int Iterations)
         {
             Console.WriteLine(string.Format("******Looping Encryption Test: Testing {0} Iterations******", Iterations));
             Console.WriteLine("Test encryption times using the RLWEN512Q12289 parameter set.");
 
-            string tm = REncrypt().ToString();
-            Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, tm));
+            double elapsed = REncrypt(Iterations);
+            Console.WriteLine(string.Format("{0} encryption cycles completed in: {1} ms", Iterations, elapsed));
+            Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
             Console.WriteLine("");
         }
 
@@ -186,26 +186,48 @@ namespace Test
         static void KeyGenSpeed(int Iterations = 1000)
         {
             Console.WriteLine(string.Format("N/Q/Sigma: Key creation average time over {0} passes:", Iterations));
-            Console.WriteLine(string.Format("256/7681/11.31: avg. {0} ms", TimeAction(new Action(N256Q7681)), Iterations));
-            Console.WriteLine(string.Format("512/12289/12.18: avg. {0} ms", TimeAction(new Action(N512Q12289)), Iterations));
+            Stopwatch runTimer = new Stopwatch();
+
+            double elapsed = N256Q7681(Iterations);
+            Console.WriteLine(string.Format("256/7681/11.31: avg. {0} ms", elapsed / Iterations, Iterations));
+            Console.WriteLine(string.Format("{0} keys created in: {1} ms", Iterations, elapsed));
+
+            elapsed = N512Q12289(Iterations);
+            Console.WriteLine(string.Format("512/12289/12.18: avg. {0} ms", elapsed / Iterations, Iterations));
+            Console.WriteLine(string.Format("{0} keys created in: {1} ms", Iterations, elapsed));
+
             Console.WriteLine("");
         }
 
-        static void N256Q7681()
+        static double N256Q7681(int Iterations)
         {
-            RLWEParameters mpar = RLWEParamSets.RLWEN256Q7681;
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(mpar);
-            IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN256Q7681);
+            IAsymmetricKeyPair akp;
+            Stopwatch runTimer = new Stopwatch();
+
+            runTimer.Start();
+            for (int i = 0; i < Iterations; i++)
+                akp = mkgen.GenerateKeyPair();
+            runTimer.Stop();
+
+            return runTimer.Elapsed.TotalMilliseconds;
         }
 
-        static void N512Q12289()
+        static double N512Q12289(int Iterations)
         {
-            RLWEParameters mpar = RLWEParamSets.RLWEN512Q12289;
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(mpar);
-            IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN512Q12289);
+            IAsymmetricKeyPair akp;
+            Stopwatch runTimer = new Stopwatch();
+
+            runTimer.Start();
+            for (int i = 0; i < Iterations; i++)
+                akp = mkgen.GenerateKeyPair();
+            runTimer.Stop();
+
+            return runTimer.Elapsed.TotalMilliseconds;
         }
 
-        static double RDecrypt(int Iterations = 1000)
+        static double RDecrypt(int Iterations)
         {
             RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN512Q12289);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
@@ -218,21 +240,21 @@ namespace Test
             {
                 mpe.Initialize(true, akp);
                 ctext = mpe.Encrypt(ptext);
-
                 mpe.Initialize(false, akp);
+
                 runTimer.Start();
                 for (int i = 0; i < Iterations; i++)
                     rtext = mpe.Decrypt(ctext);
                 runTimer.Stop();
             }
 
-            if (!Compare.AreEqual(ptext, rtext))
-                throw new Exception("Encryption test: decryption failure!");
+            //if (!Compare.AreEqual(ptext, rtext))
+            //    throw new Exception("Encryption test: decryption failure!");
 
-            return runTimer.Elapsed.TotalMilliseconds / Iterations;
+            return runTimer.Elapsed.TotalMilliseconds;
         }
 
-        static double REncrypt(int Iterations = 1000)
+        static double REncrypt(int Iterations)
         {
             RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN512Q12289);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
@@ -243,27 +265,14 @@ namespace Test
             using (RLWEEncrypt mpe = new RLWEEncrypt(RLWEParamSets.RLWEN512Q12289))
             {
                 mpe.Initialize(true, akp);
+
                 runTimer.Start();
                 for (int i = 0; i < Iterations; i++)
                     ctext = mpe.Encrypt(ptext);
                 runTimer.Stop();
             }
 
-            return runTimer.Elapsed.TotalMilliseconds / Iterations;
-        }
-
-        static double TimeAction(Action Test, int Iterations = 1)
-        {
-            Stopwatch runTimer = new Stopwatch();
-
-            runTimer.Start();
-
-            for (int i = 0; i < Iterations; i++)
-                Test();
-
-            runTimer.Stop();
-
-            return runTimer.Elapsed.TotalMilliseconds / Iterations;
+            return runTimer.Elapsed.TotalMilliseconds;
         }
         #endregion
     }
