@@ -9,3 +9,7 @@ https://eprint.iacr.org/2014/725.pdf and accompanying Github project: https://gi
 License is MIT
 
 This is a preliminary release, that will be updated when CEX moves to 1.4.
+
+API Help: http://www.vtdev.com/Ring-LWE/Help/index.html
+
+Homepage: http://www.vtdev.com/rlwehome.html
