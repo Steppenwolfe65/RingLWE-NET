@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra;
 using VTDev.Libraries.CEXEngine.Exceptions;
 #endregion
 
@@ -133,6 +132,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="KeyStream">The byte array containing the key</param>
         /// 
         /// <returns>An initialized RLWEPublicKey class</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if the stream can not be read</exception>
         public static RLWEPublicKey From(Stream KeyStream)
         {
             try
@@ -151,9 +152,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
 
                 return new RLWEPublicKey(n, a, p);
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw new RLWEException("RLWEPrivateKey:Ctor", "The stream could nor be read!", ex);
             }
         }
 
@@ -205,11 +206,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// 
         /// <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
         /// <param name="Offset">The starting position within the Output array</param>
+        /// 
+        /// <exception cref="RLWEException">Thrown if the output array is too small</exception>
         public void WriteTo(byte[] Output, int Offset)
         {
             byte[] data = ToBytes();
             if (Offset + data.Length > Output.Length - Offset)
-                throw new RLWEException("The output array is too small!");
+                throw new RLWEException("RLWEPublicKey:WriteTo", "The output array is too small!", new ArgumentOutOfRangeException());
 
             Buffer.BlockCopy(data, 0, Output, Offset, data.Length);
         }

@@ -1,4 +1,5 @@
 ﻿#region Directives
+using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Exceptions;
 #endregion
@@ -74,12 +75,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// 
         /// <param name="PublicKey">The public key</param>
         /// <param name="PrivateKey">The corresponding private key</param>
+        /// 
+        /// <exception cref="RLWEException">Thrown if an invalid key is used</exception>
         public RLWEKeyPair(IAsymmetricKey PublicKey, IAsymmetricKey PrivateKey)
         {
             if (!(PublicKey is RLWEPublicKey))
-                throw new RLWEException("Not a valid RLWE Public key!");
+                throw new RLWEException("RLWEKeyPair:Ctor", "Not a valid RLWE Public key!", new InvalidDataException());
             if (!(PrivateKey is RLWEPrivateKey))
-                throw new RLWEException("Not a valid RLWE Private key!");
+                throw new RLWEException("RLWEKeyPair:Ctor", "Not a valid RLWE Private key!", new InvalidDataException());
 
             _publicKey = (RLWEPublicKey)PublicKey;
             _privateKey = (RLWEPrivateKey)PrivateKey;
@@ -92,6 +95,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// </summary>
         /// 
         /// <param name="Key">The public or private key</param>
+        /// 
+        /// <exception cref="RLWEException">Thrown if an invalid key is used</exception>
         public RLWEKeyPair(IAsymmetricKey Key)
         {
             if (Key is RLWEPublicKey)
@@ -99,7 +104,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
             else if (Key is RLWEPrivateKey)
                 _privateKey = (RLWEPrivateKey)Key;
             else
-                throw new RLWEException("Not a valid RLWE key!");
+                throw new RLWEException("RLWEKeyPair:Ctor", "Not a valid RLWE key!", new InvalidDataException());
         }
 
         private RLWEKeyPair()

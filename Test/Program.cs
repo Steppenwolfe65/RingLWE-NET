@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Tools;
-
+//http://www.cc.gatech.edu/~cpeikert/pubs/toolkit.pdf
 namespace Test
 {
     class Program

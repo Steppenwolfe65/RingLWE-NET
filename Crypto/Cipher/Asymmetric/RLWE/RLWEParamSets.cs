@@ -1,4 +1,5 @@
 ﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Exceptions;
 #endregion
 
@@ -96,18 +97,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         public static RLWEParameters FromId(byte[] OId)
         {
             if (OId == null)
-                throw new RLWEException("OId can not be null!");
+                throw new RLWEException("RLWEParamSets:FromId", "OId can not be null!", new ArgumentNullException());
             if (OId.Length != 3)
-                throw new RLWEException("OId must be 3 bytes in length!");
+                throw new RLWEException("RLWEParamSets:FromId", "OId must be 3 bytes in length!", new ArgumentOutOfRangeException());
             if (OId[0] != 2)
-                throw new RLWEException("OId is not a valid RLWE parameter id!");
+                throw new RLWEException("RLWEParamSets:FromId", "OId is not a valid RLWE parameter id!", new ArgumentException());
 
             if (OId[2] == 0)
                 return (RLWEParameters)RLWEN256Q7681.Clone();
             else if (OId[2] == 1)
                 return (RLWEParameters)RLWEN512Q12289.Clone();
 
-            throw new RLWEException("OId does not identify a valid param set!");
+            throw new RLWEException("RLWEParamSets:FromId", "OId does not identify a valid param set!", new ArgumentOutOfRangeException());
         }
 
         /// <summary>

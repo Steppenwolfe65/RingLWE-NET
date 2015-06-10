@@ -109,12 +109,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <summary>
         /// Get: The maximum number of bytes the cipher can decrypt
         /// </summary>
+        /// 
+        /// <exception cref="RLWEException">Thrown if cipher has not been initialized</exception>
         public int MaxPlainText
         {
             get 
             { 
                 if (!_isInitialized)
-                    throw new RLWEException("The signer has not been initialized!");
+                    throw new RLWEException("RLWESign:MaxPlainText", "The signer has not been initialized!", new InvalidOperationException());
 
                 if (_keyPair.PublicKey != null)
                     return ((RLWEPublicKey)_keyPair.PublicKey).N >> 3; 
@@ -156,10 +158,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// </summary>
         /// 
         /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the RLWE public or private key</param>
+        /// 
+        /// <exception cref="RLWEException">Thrown if an invalid key pair is used</exception>
         public void Initialize(IAsymmetricKeyPair KeyPair)
         {
             if (!(KeyPair is RLWEKeyPair))
-                throw new RLWEException("The key pair is not a valid RLWE key pair!");
+                throw new RLWEException("RLWESign:Initialize", "The key pair is not a valid RLWE key pair!", new InvalidDataException());
 
             Reset();
             _keyPair = KeyPair;
@@ -181,19 +185,21 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="InputStream">The stream contining the data</param>
         /// 
         /// <returns>The encrypted hash code</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if an invalid key pair is used, or signer has not been initialized</exception>
         public byte[] Sign(Stream InputStream)
         {
             if (!_isInitialized)
-                throw new RLWEException("The signer has not been initialized!");
+                throw new RLWEException("RLWESign:Sign", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PublicKey == null)
-                throw new RLWEException("The public key is invalid!");
+                throw new RLWEException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
             if (!(_keyPair.PublicKey is RLWEPublicKey))
-                throw new RLWEException("The public key is invalid!");
+                throw new RLWEException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(true, _keyPair);
 
             if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
-                throw new RLWEException(String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText));
+                throw new RLWEException("RLWESign:Sign", String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new ArgumentException());
 
             byte[] hash = Compute(InputStream);
 
@@ -209,21 +215,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Length">The number of bytes to process</param>
         /// 
         /// <returns>The encrypted hash code</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if input array is too short, signer is not initialized, or keys are invalid</exception>
         public byte[] Sign(byte[] Input, int Offset, int Length)
         {
             if (Input.Length - Offset < Length)
-                throw new RLWEException("The input array is too short!");
+                throw new RLWEException("RLWESign:Sign", "The input array is too short!", new ArgumentException());
             if (!_isInitialized)
-                throw new RLWEException("The signer has not been initialized!");
+                throw new RLWEException("RLWESign:Sign", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PublicKey == null)
-                throw new RLWEException("The public key is invalid!");
+                throw new RLWEException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
             if (!(_keyPair.PublicKey is RLWEPublicKey))
-                throw new RLWEException("The public key is invalid!");
+                throw new RLWEException("RLWESign:Sign", "The public key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(true, _keyPair);
 
             if (_asyCipher.MaxPlainText < _dgtEngine.DigestSize)
-                throw new RLWEException(String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText));
+                throw new RLWEException("RLWESign:Sign", String.Format("The key size is too small; key supports encrypting up to {0} bytes!", _asyCipher.MaxPlainText), new InvalidDataException());
 
             byte[] hash = Compute(Input, Offset, Length);
 
@@ -238,14 +246,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Code">The encrypted hash code</param>
         /// 
         /// <returns>Returns <c>true</c> if the codes match</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if signer is not initialized, or keys are invalid</exception>
         public bool Verify(Stream InputStream, byte[] Code)
         {
             if (!_isInitialized)
-                throw new RLWEException("The signer has not been initialized!");
+                throw new RLWEException("RLWESign:Verify", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PrivateKey == null)
-                throw new RLWEException("The private key is invalid!");
+                throw new RLWEException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
             if (!(_keyPair.PrivateKey is RLWEPrivateKey))
-                throw new RLWEException("The private key is invalid!");
+                throw new RLWEException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(false, _keyPair);
             byte[] chksum = _asyCipher.Decrypt(Code);
@@ -264,16 +274,18 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Code">The encrypted hash code</param>
         /// 
         /// <returns>Returns <c>true</c> if the codes match</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if input array is too short, signer is not initialized, or keys are invalid</exception>
         public bool Verify(byte[] Input, int Offset, int Length, byte[] Code)
         {
             if (Input.Length - Offset < Length)
-                throw new RLWEException("The input array is too short!");
+                throw new RLWEException("RLWESign:Verify", "The input array is too short!", new ArgumentOutOfRangeException());
             if (!_isInitialized)
-                throw new RLWEException("The signer has not been initialized!");
+                throw new RLWEException("RLWESign:Verify", "The signer has not been initialized!", new InvalidOperationException());
             if (_keyPair.PrivateKey == null)
-                throw new RLWEException("The private key is invalid!");
+                throw new RLWEException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
             if (!(_keyPair.PrivateKey is RLWEPrivateKey))
-                throw new RLWEException("The private key is invalid!");
+                throw new RLWEException("RLWESign:Verify", "The private key is invalid!", new InvalidDataException());
 
             _asyCipher.Initialize(false, _keyPair);
             byte[] chksum = _asyCipher.Decrypt(Code);

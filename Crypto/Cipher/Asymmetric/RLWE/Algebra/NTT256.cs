@@ -284,32 +284,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra
             return data;
         }
 
-        private static ushort[] Convert32To16(uint[] Source)
-        {
-            ushort[] data = new ushort[Source.Length];
-
-            for (int i = 0; i < Source.Length; i++)
-                data[i] = (ushort)Source[i];
-
-            return data;
-        }
-
         private static uint[] Convert8To32(byte[] Source)
         {
             uint[] data = new uint[Source.Length / 2];
 
             for (int i = 0, j = 0; i < Source.Length; i += 2, j += 4)
                 Buffer.BlockCopy(Source, i, data, j, 2);
-
-            return data;
-        }
-
-        private static uint[] Convert16To32(ushort[] Source)
-        {
-            uint[] data = new uint[Source.Length];
-
-            for (int i = 0; i < Source.Length; i++)
-                data[i] = (uint)Source[i];
 
             return data;
         }
@@ -698,8 +678,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra
 
         private void RLWEDecrypt(uint[] C1, uint[] C2, uint[] R2)
         {
-            FFT.Mul2(C1, C1, R2, MODULUS);	// c1 <-- c1*r2
-            FFT.Add2(C1, C1, C2, MODULUS);	// c1 <-- c1*r2 + c2
+            FFT.Mul2(C1, C1, R2, MODULUS);	        // c1 <-- c1*r2
+            FFT.Add2(C1, C1, C2, MODULUS);	        // c1 <-- c1*r2 + c2
 
             InvNTT(C1);
         }

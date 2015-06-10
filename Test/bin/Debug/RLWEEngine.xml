@@ -499,6 +499,8 @@
             </summary>
             
             <param name="KeyPair">The <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair"/> containing the RLWE public or private key</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if an invalid key pair is used</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Reset">
             <summary>
@@ -513,6 +515,8 @@
             <param name="InputStream">The stream contining the data</param>
             
             <returns>The encrypted hash code</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if an invalid key pair is used, or signer has not been initialized</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Sign(System.Byte[],System.Int32,System.Int32)">
             <summary>
@@ -524,6 +528,8 @@
             <param name="Length">The number of bytes to process</param>
             
             <returns>The encrypted hash code</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if input array is too short, signer is not initialized, or keys are invalid</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Verify(System.IO.Stream,System.Byte[])">
             <summary>
@@ -534,6 +540,8 @@
             <param name="Code">The encrypted hash code</param>
             
             <returns>Returns <c>true</c> if the codes match</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if signer is not initialized, or keys are invalid</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Verify(System.Byte[],System.Int32,System.Int32,System.Byte[])">
             <summary>
@@ -546,6 +554,8 @@
             <param name="Code">The encrypted hash code</param>
             
             <returns>Returns <c>true</c> if the codes match</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if input array is too short, signer is not initialized, or keys are invalid</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWESign.Compute(System.IO.Stream)">
             <summary>
@@ -585,6 +595,8 @@
             <summary>
             Get: The maximum number of bytes the cipher can decrypt
             </summary>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if cipher has not been initialized</exception>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Utility.IntUtils">
             <summary>
@@ -835,7 +847,37 @@
             Exception constructor
             </summary>
             
-            <param name="Msg">A custom message or error data</param>
+            <param name="Message">A custom message or error data</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Exceptions.RLWEException.#ctor(System.String,System.Exception)">
+            <summary>
+            Exception constructor
+            </summary>
+            
+            <param name="Message">A custom message or error data</param>
+            <param name="InnerException">The underlying exception</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Exceptions.RLWEException.#ctor(System.String,System.String)">
+            <summary>
+            Exception constructor
+            </summary>
+            
+            <param name="Origin">The origin of the exception</param>
+            <param name="Message">A custom message or error data</param>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Exceptions.RLWEException.#ctor(System.String,System.String,System.Exception)">
+            <summary>
+            Exception constructor
+            </summary>
+            
+            <param name="Origin">The origin of the exception</param>
+            <param name="Message">A custom message or error data</param>
+            <param name="InnerException">The underlying exception</param>
+        </member>
+        <member name="P:VTDev.Libraries.CEXEngine.Exceptions.RLWEException.Origin">
+            <summary>
+            The origin of the exception in the format Class:Method
+            </summary>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Crypto.Digest.Keccak1024">
             <summary>
@@ -1062,6 +1104,8 @@
             <param name="KeyStream">The byte array containing the key</param>
             
             <returns>An initialized RLWEPublicKey class</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if the stream can not be read</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey.ToBytes">
             <summary>
@@ -1091,6 +1135,8 @@
             
             <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
             <param name="Offset">The starting position within the Output array</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if the output array is too small</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPublicKey.WriteTo(System.IO.Stream)">
             <summary>
@@ -2274,6 +2320,8 @@
             
             <param name="PublicKey">The public key</param>
             <param name="PrivateKey">The corresponding private key</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if an invalid key is used</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEKeyPair.#ctor(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey)">
             <summary>
@@ -2281,6 +2329,8 @@
             </summary>
             
             <param name="Key">The public or private key</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if an invalid key is used</exception>
         </member>
         <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEKeyPair.PublicKey">
             <summary>
@@ -2958,7 +3008,7 @@
             <param name="MFP">The number of random bytes to prepend to the message</param>
             <param name="Engine">The PRNG engine used to power SecureRandom</param>
             
-            <exception cref="T:System.ArgumentException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters.Finalize">
             <summary>
@@ -3011,6 +3061,8 @@
             
             <param name="Output">RLWEParameters as a byte array; array must be initialized and of sufficient length</param>
             <param name="Offset">The starting position within the Output array</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if The output array is too small</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters.WriteTo(System.IO.Stream)">
             <summary>
@@ -4231,12 +4283,17 @@
              A Secure PRNG using RNGCryptoServiceProvider
             </summary>
         </member>
+        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Prngs.DGCPrng">
+            <summary>
+            A Digest Counter mode random number generator
+            </summary>
+        </member>
         <member name="F:VTDev.Libraries.CEXEngine.Crypto.Prngs.MODEXPG">
             <summary>
             A Modular Exponentiation Generator (MODEXPG) random number generator
             </summary>
         </member>
-        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Prngs.PSBPrng">
+        <member name="F:VTDev.Libraries.CEXEngine.Crypto.Prngs.PBPrng">
             <summary>
             An implementation of a passphrase based PKCS#5 random number generator
             </summary>
@@ -7350,6 +7407,8 @@
             <param name="Input">The cipher text</param>
             
             <returns>The plain text</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if cipher has not been initialized</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEEncrypt.Encrypt(System.Byte[])">
             <summary>
@@ -7359,6 +7418,8 @@
             <param name="Input">The plain text</param>
             
             <returns>The cipher text</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if cipher has not been initialized, or input text is too long</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEEncrypt.GetKeySize(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey)">
             <summary>
@@ -7368,6 +7429,8 @@
             <param name="Key">The key</param>
             
             <returns>The size of the key</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if cipher has not been initialized, or key is invalid</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEEncrypt.Initialize(System.Boolean,VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair)">
             <summary>
@@ -7377,6 +7440,8 @@
             
             <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
             <param name="KeyPair">The <see cref="T:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair"/> containing the RLWE public or private key</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if cipher has not been initialized</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEEncrypt.GetPrng(VTDev.Libraries.CEXEngine.Crypto.Prngs)">
             <summary>
@@ -7396,11 +7461,15 @@
             <summary>
             Get: The maximum number of bytes the cipher can encrypt
             </summary>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if cipher has not been initialized</exception>
         </member>
         <member name="P:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEEncrypt.MaxPlainText">
             <summary>
             Get: The maximum number of bytes the cipher can decrypt
             </summary>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if cipher has not been initialized</exception>
         </member>
         <member name="T:VTDev.Libraries.CEXEngine.Utility.ParallelUtils">
             <summary>
@@ -9458,7 +9527,18 @@
             Initialize this class
             </summary>
             
+            <param name="CiphersParams">The RLWEParameters instance containing the cipher settings</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if a Prng that requires pre-initialization is used; (wrong constructor)</exception>
+        </member>
+        <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEKeyGenerator.#ctor(VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEParameters,VTDev.Libraries.CEXEngine.Crypto.Prng.IRandom)">
+            <summary>
+            Use an initialized prng to generate the key; use this constructor with an Rng that requires pre-initialization, 
+            i.e. PBPrng, XDC, or DGCPrng, or CTRPrng
+            </summary>
+            
             <param name="CiphersParams">The RLWEParameters instance containing thecipher settings</param>
+            <param name="RngEngine">An initialized Prng instance</param>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEKeyGenerator.GenerateKeyPair">
             <summary>
@@ -10423,6 +10503,8 @@
             <param name="KeyStream">The byte array containing the key</param>
             
             <returns>An initialized MPKCPublicKey class</returns>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if the stream can not be read</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey.ToBytes">
             <summary>
@@ -10452,6 +10534,8 @@
             
             <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
             <param name="Offset">The starting position within the Output array</param>
+            
+            <exception cref="T:VTDev.Libraries.CEXEngine.Exceptions.RLWEException">Thrown if the output array is too small</exception>
         </member>
         <member name="M:VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.RLWEPrivateKey.WriteTo(System.IO.Stream)">
             <summary>

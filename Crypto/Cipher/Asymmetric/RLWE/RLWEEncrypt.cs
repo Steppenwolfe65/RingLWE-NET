@@ -1,10 +1,10 @@
 ﻿#region Directives
 using System;
+using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.Exceptions;
-using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Exceptions;
 using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
@@ -119,12 +119,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <summary>
         /// Get: The maximum number of bytes the cipher can encrypt
         /// </summary>
+        /// 
+        /// <exception cref="RLWEException">Thrown if cipher has not been initialized</exception>
         public int MaxCipherText
         {
             get 
             {
                 if (_maxCipherText == 0 || !_isInitialized)
-                    throw new RLWEException("The cipher must be initialized before size can be calculated!");
+                    throw new RLWEException("RLWEEncrypt:MaxCipherText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
                 return _maxCipherText; 
             }
@@ -133,12 +135,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <summary>
         /// Get: The maximum number of bytes the cipher can decrypt
         /// </summary>
+        /// 
+        /// <exception cref="RLWEException">Thrown if cipher has not been initialized</exception>
         public int MaxPlainText
         {
             get 
             {
                 if (_maxPlainText == 0 || !_isInitialized)
-                    throw new RLWEException("The cipher must be initialized before size can be calculated!");
+                    throw new RLWEException("RLWEEncrypt:MaxPlainText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
 
                 return _maxPlainText; 
             }
@@ -203,10 +207,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Input">The cipher text</param>
         /// 
         /// <returns>The plain text</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if cipher has not been initialized</exception>
         public byte[] Decrypt(byte[] Input)
         {
             if (!_isInitialized)
-                throw new RLWEException("The cipher has not been initialized!");
+                throw new RLWEException("RLWEEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
 
             int plen = _N >> 3;
 
@@ -229,12 +235,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Input">The plain text</param>
         /// 
         /// <returns>The cipher text</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if cipher has not been initialized, or input text is too long</exception>
         public byte[] Encrypt(byte[] Input)
         {
             if (!_isInitialized)
-                throw new RLWEException("The cipher has not been initialized!");
+                throw new RLWEException("RLWEEncrypt:Encrypt", "The cipher has not been initialized!", new InvalidOperationException());
             if (Input.Length > _maxPlainText - _mFp)
-                throw new RLWEException("The input text is too long!");
+                throw new RLWEException("RLWEEncrypt:Encrypt", "The input text is too long!", new ArgumentOutOfRangeException());
 
             int plen = _N >> 3;
 
@@ -281,17 +289,19 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Key">The key</param>
         /// 
         /// <returns>The size of the key</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if cipher has not been initialized, or key is invalid</exception>
         public int GetKeySize(IAsymmetricKey Key)
         {
             if (!_isInitialized)
-                throw new RLWEException("The cipher has not been initialized!");
+                throw new RLWEException("RLWEEncrypt:GetKeySize", "The cipher has not been initialized!", new InvalidOperationException());
 
             if (Key is RLWEPublicKey)
                 return ((RLWEPublicKey)Key).N;
             if (Key is RLWEPrivateKey)
                 return ((RLWEPrivateKey)Key).N;
 
-            throw new RLWEException("Unsupported key type!");
+            throw new RLWEException("RLWEEncrypt:GetKeySize", "Unsupported key type!", new InvalidDataException());
         }
 
         /// <summary>
@@ -301,10 +311,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// 
         /// <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
         /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the RLWE public or private key</param>
+        /// 
+        /// <exception cref="RLWEException">Thrown if cipher has not been initialized</exception>
         public void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair)
         {
             if (!(KeyPair is RLWEKeyPair))
-                throw new RLWEException("Not a valid RLWE key pair!");
+                throw new RLWEException("RLWEEncrypt:Initialize", "Not a valid RLWE key pair!", new InvalidDataException());
 
             _isEncryption = Encryption;
             _keyPair = (RLWEKeyPair)KeyPair;

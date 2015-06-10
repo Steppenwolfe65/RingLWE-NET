@@ -65,6 +65,14 @@
         ///  A Secure PRNG using RNGCryptoServiceProvider
         /// </summary>
         CSPRng,
+        // /// <summary>
+        // /// A Symmetric Cipher Counter mode random number generator
+        // /// </summary>
+        //CTRPrng, // implemented only in CEX 1.4
+        /// <summary>
+        /// A Digest Counter mode random number generator
+        /// </summary>
+        DGCPrng,
         /// <summary>
         /// A Modular Exponentiation Generator (MODEXPG) random number generator
         /// </summary>
@@ -72,7 +80,7 @@
         /// <summary>
         /// An implementation of a passphrase based PKCS#5 random number generator
         /// </summary>
-        PSBPrng,
+        PBPrng,
         /// <summary>
         /// A Quadratic Congruential Generator I (QCG-I) random number generator
         /// </summary>

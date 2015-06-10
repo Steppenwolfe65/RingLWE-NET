@@ -1,4 +1,5 @@
 ﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
@@ -77,6 +78,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     {
         #region Fields
         private RLWEParameters _rlweParams;
+        private IRandom _rngEngine;
         #endregion
 
         #region Constructor
@@ -84,13 +86,30 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// Initialize this class
         /// </summary>
         /// 
-        /// <param name="CiphersParams">The RLWEParameters instance containing thecipher settings</param>
+        /// <param name="CiphersParams">The RLWEParameters instance containing the cipher settings</param>
+        /// 
+        /// <exception cref="RLWEException">Thrown if a Prng that requires pre-initialization is used; (wrong constructor)</exception>
         public RLWEKeyGenerator(RLWEParameters CiphersParams)
         {
-            if (CiphersParams.RandomEngine == Prngs.PSBPrng)
-                throw new RLWEException("Passphrase based Prng is not valid for key generation!");
-
             _rlweParams = CiphersParams;
+            // XDC, DGCPrng, or CTRPrng only supported in CEX 1.4
+            if (CiphersParams.RandomEngine == Prngs.PBPrng)
+                throw new RLWEException("RLWEKeyGenerator:Ctor", "Passphrase based, digest, and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
+
+            _rngEngine = GetPrng(CiphersParams.RandomEngine);
+        }
+
+        /// <summary>
+        /// Use an initialized prng to generate the key; use this constructor with an Rng that requires pre-initialization, 
+        /// i.e. PBPrng, XDC, or DGCPrng, or CTRPrng
+        /// </summary>
+        /// 
+        /// <param name="CiphersParams">The RLWEParameters instance containing thecipher settings</param>
+        /// <param name="RngEngine">An initialized Prng instance</param>
+        public RLWEKeyGenerator(RLWEParameters CiphersParams, IRandom RngEngine)
+        {
+            _rlweParams = CiphersParams;
+            _rngEngine = RngEngine;
         }
 
         private RLWEKeyGenerator()
@@ -107,9 +126,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         public IAsymmetricKeyPair GenerateKeyPair()
         {
             if (_rlweParams.N == 512)
-                return new NTT512(GetPrng(_rlweParams.RandomEngine)).Generate();
+                return new NTT512(_rngEngine).Generate();
             else
-                return new NTT256(GetPrng(_rlweParams.RandomEngine)).Generate();
+                return new NTT256(_rngEngine).Generate();
         }
         #endregion
 

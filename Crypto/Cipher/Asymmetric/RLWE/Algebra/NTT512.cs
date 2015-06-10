@@ -149,21 +149,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra
         /// <returns>The decrypted message</returns>
         public byte[] Decrypt(RLWEPrivateKey PrivateKey, byte[] Message)
         {
-            int len = Message.Length / 2;
             uint[] lmsg = new uint[M];
             uint[] lmsg2 = new uint[M];
-            ushort[] sc1 = new ushort[M];
-            ushort[] sc2 = new ushort[M];
 
-            Buffer.BlockCopy(Message, 0, sc1, 0, len);
-            Buffer.BlockCopy(Message, len, sc2, 0, len);
-
-            uint[] cpt1 = Convert16To32(sc1);
-            uint[] cpt2 = Convert16To32(sc2);
-
-            RLWEDecrypt(cpt1, cpt2, Convert8To32(PrivateKey.R2));
-            QBDecode(cpt1);
-            ArrangeFinal(cpt1, lmsg2);
+            uint[][] cpt = ArrayUtils.Split(Convert8To32(Message), Message.Length / 4);
+            RLWEDecrypt(cpt[0], cpt[1], Convert8To32(PrivateKey.R2));
+            QBDecode(cpt[0]);
+            ArrangeFinal(cpt[0], lmsg2);
 
             return Decode(lmsg2);
         }
@@ -297,32 +289,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra
             return data;
         }
 
-        private static ushort[] Convert32To16(uint[] Source)
-        {
-            ushort[] data = new ushort[Source.Length];
-
-            for (int i = 0; i < Source.Length; i++)
-                data[i] = (ushort)Source[i];
-
-            return data;
-        }
-
         private static uint[] Convert8To32(byte[] Source)
         {
             uint[] data = new uint[Source.Length / 2];
 
             for (int i = 0, j = 0; i < Source.Length; i += 2, j += 4)
                 Buffer.BlockCopy(Source, i, data, j, 2);
-
-            return data;
-        }
-
-        private static uint[] Convert16To32(ushort[] Source)
-        {
-            uint[] data = new uint[Source.Length];
-
-            for (int i = 0; i < Source.Length; i++)
-                data[i] = (uint)Source[i];
 
             return data;
         }
@@ -721,7 +693,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra
             uint[] encMsg = new uint[M];
 
             for (int i = 0; i < M; i++)
-                encMsg[i] = Msg[i] * QBY2;		            // encoding of message
+                encMsg[i] = Msg[i] * QBY2;	    // encoding of message
 
             KnuthYao(e1);
             KnuthYao(e2);

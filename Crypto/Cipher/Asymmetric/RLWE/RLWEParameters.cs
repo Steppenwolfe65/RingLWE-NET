@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Algebra;
 using VTDev.Libraries.CEXEngine.Exceptions;
 #endregion
 
@@ -208,17 +207,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="MFP">The number of random bytes to prepend to the message</param>
         /// <param name="Engine">The PRNG engine used to power SecureRandom</param>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
+        /// <exception cref="RLWEException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
         public RLWEParameters(int N, int Q, double Sigma, byte[] OId, int MFP = DEFAULT_MFP, Prngs Engine = Prngs.CSPRng)
         {
             if (N != 256 && N != 512)
-                throw new ArgumentException("N is invalid (only 256 or 512 currently supported)!");
+                throw new RLWEException("RLWEParameters:Ctor", "N is invalid (only 256 or 512 currently supported)!", new ArgumentOutOfRangeException());
             if (Q != 7681 && Q != 12289)
-                throw new ArgumentException("Q is invalid (only 7681 or 12289 currently supported)!");
+                throw new RLWEException("RLWEParameters:Ctor", "Q is invalid (only 7681 or 12289 currently supported)!", new ArgumentOutOfRangeException());
             if (Sigma != 11.31 && Sigma != 12.18)
-                throw new ArgumentException("Sigma is invalid (only 11.31 or 12.18 currently supported)!");
+                throw new RLWEException("RLWEParameters:Ctor", "Sigma is invalid (only 11.31 or 12.18 currently supported)!", new ArgumentOutOfRangeException());
             if (N == 256 && MFP > 16 || N == 512 && MFP > 32)
-                throw new ArgumentException("MFP is invalid (forward padding can not be longer than half the maximum message size)!");
+                throw new RLWEException("RLWEParameters:Ctor", "MFP is invalid (forward padding can not be longer than half the maximum message size)!", new ArgumentOutOfRangeException());
 
             _Sigma = Sigma;
             _N = N;
@@ -328,11 +327,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// 
         /// <param name="Output">RLWEParameters as a byte array; array must be initialized and of sufficient length</param>
         /// <param name="Offset">The starting position within the Output array</param>
+        /// 
+        /// <exception cref="RLWEException">Thrown if The output array is too small</exception>
         public void WriteTo(byte[] Output, int Offset)
         {
             byte[] data = ToBytes();
             if (Offset + data.Length > Output.Length - Offset)
-                throw new RLWEException("The output array is too small!");
+                throw new RLWEException("RLWEParameters:WriteTo", "The output array is too small!", new ArgumentOutOfRangeException());
 
             Buffer.BlockCopy(data, 0, Output, Offset, data.Length);
         }
