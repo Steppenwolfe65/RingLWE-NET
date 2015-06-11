@@ -16,7 +16,7 @@ namespace VTDev.Libraries.CEXEngine.Utility
     public class ParallelUtils
     {
         #region Fields
-        private static bool _frcLinear = false;
+        private static bool _frcLinear = false; 
         #endregion
 
         #region Properties

@@ -5,7 +5,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Tools;
-//http://www.cc.gatech.edu/~cpeikert/pubs/toolkit.pdf
+
 namespace Test
 {
     class Program
@@ -27,6 +27,8 @@ namespace Test
             Console.WriteLine("* Date:      June 8, 2015                    *");
             Console.WriteLine("* Contact:   develop@vtdev.com               *");
             Console.WriteLine("**********************************************");
+            Console.WriteLine("");
+            Console.WriteLine("COMPILE as Any CPU / Release mode, RUN the .exe for real timings");
             Console.WriteLine("");
 
             // encrypt
@@ -56,8 +58,11 @@ namespace Test
             if (keyInfo.Key.Equals(ConsoleKey.Y))
             {
                 Console.WriteLine("");
-                if (Debugger.IsAttached) 
+                if (Debugger.IsAttached)
+                {
                     Console.WriteLine("You are running in Debug mode! Compiled times will be much faster..");
+                    Console.WriteLine("");
+                }
 
                 KeyGenSpeed(CYCLE_COUNT);
                 EncryptionSpeed(CYCLE_COUNT);

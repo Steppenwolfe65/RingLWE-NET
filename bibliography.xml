@@ -241,6 +241,11 @@
     <author>Wolfgang W. Bein, Mordecai J. Golin, Lawrence L. Larmore, and Yan Zhang</author>
     <link>http://www.egr.unlv.edu/~bein/pubs/knuthyaotalg.pdf</link>
   </reference>
+  <reference name="RLWE Toolkit">
+    <title>A Toolkit for Ring-LWE Cryptography</title>
+    <author>Vadim Lyubashevsky, Chris Peikerty, and Oded Regev</author>
+    <link>http://www.cc.gatech.edu/~cpeikert/pubs/toolkit.pdf</link>
+  </reference>
   
   <reference name="RNGCryptoServiceProvider">
     <title>RNGCryptoServiceProvider</title>

@@ -91,6 +91,16 @@
     <Compile Include="Crypto\Cipher\Asymmetric\RLWE\RLWEParamSets.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\RLWE\RLWEPrivateKey.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\RLWE\RLWEPublicKey.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\IBlockCipher.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RDX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RHX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RSM.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\RSX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\SHX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\SPX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\TFX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\THX.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Block\TSM.cs" />
     <Compile Include="Crypto\Digest\Blake256.cs" />
     <Compile Include="Crypto\Digest\Blake512.cs" />
     <Compile Include="Crypto\Digest\IDigest.cs" />
@@ -102,9 +112,11 @@
     <Compile Include="Crypto\Digest\Skein1024.cs" />
     <Compile Include="Crypto\Digest\Skein256.cs" />
     <Compile Include="Crypto\Digest\Skein512.cs" />
+    <Compile Include="Crypto\Generator\CTRDrbg.cs" />
     <Compile Include="Crypto\Generator\DGCDRBG.cs" />
     <Compile Include="Crypto\Generator\HKDF.cs" />
     <Compile Include="Crypto\Generator\IGenerator.cs" />
+    <Compile Include="Crypto\Generator\KDF2Drbg.cs" />
     <Compile Include="Crypto\Generator\PBKDF2.cs" />
     <Compile Include="Crypto\Generator\PKCS5.cs" />
     <Compile Include="Crypto\Helper\Enums.cs" />
@@ -116,12 +128,17 @@
     <Compile Include="Crypto\Prng\BBSG.cs" />
     <Compile Include="Crypto\Prng\CCG.cs" />
     <Compile Include="Crypto\Prng\CSPRng.cs" />
+    <Compile Include="Crypto\Prng\CTRPrng.cs" />
+    <Compile Include="Crypto\Prng\DGCPrng.cs" />
     <Compile Include="Crypto\Prng\IRandom.cs" />
     <Compile Include="Crypto\Prng\MODEXPG.cs" />
     <Compile Include="Crypto\Prng\PBPRng.cs" />
     <Compile Include="Crypto\Prng\QCG1.cs" />
     <Compile Include="Crypto\Prng\QCG2.cs" />
     <Compile Include="Crypto\Prng\SecureRandom.cs" />
+    <Compile Include="Crypto\Seed\CSPRsg.cs" />
+    <Compile Include="Crypto\Seed\ISeed.cs" />
+    <Compile Include="Crypto\Seed\XSPRsg.cs" />
     <Compile Include="Exceptions\RLWEException.cs" />
     <Compile Include="Numeric\BigDecimal.cs" />
     <Compile Include="Numeric\BigEndian.cs" />
@@ -147,9 +164,7 @@
     <Compile Include="Utility\MemoryUtils.cs" />
     <Compile Include="Utility\ParallelUtils.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Crypto\Seed\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="bibliography.xml" />
   </ItemGroup>
