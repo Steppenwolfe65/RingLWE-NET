@@ -11,6 +11,7 @@ namespace Test
     class Program
     {
         const int CYCLE_COUNT = 1000;
+        const string CON_TITLE = "RLWE> ";
 
         #region Main
         static void Main(string[] args)
@@ -28,70 +29,83 @@ namespace Test
             Console.WriteLine("* Contact:   develop@vtdev.com               *");
             Console.WriteLine("**********************************************");
             Console.WriteLine("");
-            Console.WriteLine("COMPILE as Any CPU / Release mode, RUN the .exe for real timings");
+            Console.WriteLine("COMPILE as Any CPU | Release mode, RUN the .exe for real timings");
             Console.WriteLine("");
 
-            // encrypt
-            Console.WriteLine("******TESTING ENCRYPTION AND DECRYPTION******");
-            RunTest(new RLWEEncryptionTest());
-            Console.WriteLine("");/**/
+            if (Debugger.IsAttached)
+            {
+                Console.WriteLine("You are running in Debug mode! Compiled times will be much faster..");
+                Console.WriteLine("");
+            }
 
-            // serialization tests
-            Console.WriteLine("******TESTING KEY SERIALIZATION******");
-            RunTest(new RLWEKeyTest());
-            Console.WriteLine("");/**/
-
-            Console.WriteLine("******TESTING PARAMETERS******");
-            RunTest(new RLWEParamTest());
-            Console.WriteLine("");/**/
-
-            // cca2 encryption
-            Console.WriteLine("******TESTING SIGNING FUNCTIONS******");
-            RunTest(new RLWESignTest());
-            Console.WriteLine("");/**/
-
-            Console.WriteLine("Validity Tests Completed!");
-            Console.WriteLine("");
-            Console.WriteLine("Run Speed Tests? Press 'Y' to run, all other keys close..");
+            Console.WriteLine(CON_TITLE + "Run Validation Tests? Press 'Y' to run, any other key to skip..");
             ConsoleKeyInfo keyInfo = Console.ReadKey();
+            Console.WriteLine("");
 
             if (keyInfo.Key.Equals(ConsoleKey.Y))
             {
-                Console.WriteLine("");
-                if (Debugger.IsAttached)
-                {
-                    Console.WriteLine("You are running in Debug mode! Compiled times will be much faster..");
-                    Console.WriteLine("");
-                }
+                // encrypt
+                Console.WriteLine("******TESTING ENCRYPTION AND DECRYPTION******");
+                RunTest(new RLWEEncryptionTest());
+                Console.WriteLine("");/**/
 
+                // serialization tests
+                Console.WriteLine("******TESTING KEY SERIALIZATION******");
+                RunTest(new RLWEKeyTest());
+                Console.WriteLine("");/**/
+
+                Console.WriteLine("******TESTING PARAMETERS******");
+                RunTest(new RLWEParamTest());
+                Console.WriteLine("");/**/
+
+                // cca2 encryption
+                Console.WriteLine("******TESTING SIGNING FUNCTIONS******");
+                RunTest(new RLWESignTest());
+                Console.WriteLine("");/**/
+            }
+
+            Console.WriteLine("");
+            Console.WriteLine(CON_TITLE + "Run Speed Tests? Press 'Y' to run, any other key to skip..");
+            keyInfo = Console.ReadKey();
+            Console.WriteLine("");
+
+            if (keyInfo.Key.Equals(ConsoleKey.Y))
+            {
                 KeyGenSpeed(CYCLE_COUNT);
                 EncryptionSpeed(CYCLE_COUNT);
                 DecryptionSpeed(CYCLE_COUNT);
                 Console.WriteLine("Speed Tests Completed!");
                 Console.WriteLine("");
-                Console.WriteLine("");
-                Console.WriteLine("Run Looping Full-Cycle Tests? Press 'Y' to run, all other keys close..");
-                keyInfo = Console.ReadKey();
+            }
 
-                if (keyInfo.Key.Equals(ConsoleKey.Y))
+            Console.WriteLine("");
+            Console.WriteLine(CON_TITLE + "Run Looping Full-Cycle Tests? Press 'Y' to run, all other keys close..");
+            keyInfo = Console.ReadKey();
+            Console.WriteLine("");
+
+            if (keyInfo.Key.Equals(ConsoleKey.Y))
+            {
+                Console.WriteLine("");
+                Console.WriteLine("******Looping: Key Generation/Encryption/Decryption and Verify Test******");
+                Console.WriteLine(string.Format("Testing {0} Full Cycles, throws on all failures..", CYCLE_COUNT));
+                Console.WriteLine("");
+                try
                 {
+                    Console.WriteLine("Test cycle using the RLWEN256Q7681 parameter set.");
+                    CycleTest(CYCLE_COUNT, RLWEParamSets.RLWEN256Q7681);
                     Console.WriteLine("");
-                    Console.WriteLine("******Looping: Key Generation/Encryption/Decryption and Verify Test******");
-                    Console.WriteLine(string.Format("Testing {0} Full Cycles, throws on all failures..", CYCLE_COUNT));
-                    try
-                    {
-                        CycleTest(CYCLE_COUNT);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Loop test failed! " + ex.Message);
-                        Console.WriteLine("Press any key to close");
-                    }
+                    Console.WriteLine("Test cycle using the RLWEN512Q12289 parameter set.");
+                    CycleTest(CYCLE_COUNT, RLWEParamSets.RLWEN512Q12289);
+                    Console.WriteLine("");
+                    Console.WriteLine(CON_TITLE + "All tests have completed, press any key to close..");
+                    Console.ReadKey();
                 }
-
-                Console.WriteLine("");
-                Console.WriteLine("All tests have completed, press any key to close..");
-                Console.ReadKey();
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Loop test failed! " + ex.Message);
+                    Console.WriteLine(CON_TITLE + "Press any key to close");
+                    Console.ReadKey();
+                }
             }
             else
             {
@@ -114,7 +128,7 @@ namespace Test
                 Console.WriteLine("An error has occured!");
                 Console.WriteLine(Ex.Message);
                 Console.WriteLine("");
-                Console.WriteLine("Continue Testing? Press 'Y' to continue, all other keys abort..");
+                Console.WriteLine(CON_TITLE + "Continue Testing? Press 'Y' to continue, all other keys abort..");
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
 
                 if (!keyInfo.Key.Equals(ConsoleKey.Y))
@@ -131,12 +145,12 @@ namespace Test
         #endregion
 
         #region Timing Tests
-        static void CycleTest(int Iterations)
+        static void CycleTest(int Iterations, RLWEParameters Param)
         {
             Stopwatch runTimer = new Stopwatch();
             runTimer.Start();
             for (int i = 0; i < Iterations; i++)
-                FullCycle();
+                FullCycle(Param);
             runTimer.Stop();
 
             double elapsed = runTimer.Elapsed.TotalMilliseconds;
@@ -148,9 +162,15 @@ namespace Test
         static void DecryptionSpeed(int Iterations)
         {
             Console.WriteLine(string.Format("******Looping Decryption Test: Testing {0} Iterations******", Iterations));
-            Console.WriteLine("Test decryption times using the RLWEN512Q12289 parameter set.");
 
-            double elapsed = RDecrypt(Iterations);
+            Console.WriteLine("Test decryption times using the RLWEN256Q7681 parameter set.");
+            double elapsed = Decrypt(Iterations, RLWEParamSets.RLWEN256Q7681);
+            Console.WriteLine(string.Format("{0} decryption cycles completed in: {1} ms", Iterations, elapsed));
+            Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
+            Console.WriteLine("");
+
+            Console.WriteLine("Test decryption times using the RLWEN512Q12289 parameter set.");
+            elapsed = Decrypt(Iterations, RLWEParamSets.RLWEN512Q12289);
             Console.WriteLine(string.Format("{0} decryption cycles completed in: {1} ms", Iterations, elapsed));
             Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
             Console.WriteLine("");
@@ -159,22 +179,26 @@ namespace Test
         static void EncryptionSpeed(int Iterations)
         {
             Console.WriteLine(string.Format("******Looping Encryption Test: Testing {0} Iterations******", Iterations));
-            Console.WriteLine("Test encryption times using the RLWEN512Q12289 parameter set.");
+            Console.WriteLine("Test encryption times using the RLWEN256Q7681 parameter set.");
+            double elapsed = Encrypt(Iterations, RLWEParamSets.RLWEN256Q7681);
+            Console.WriteLine(string.Format("{0} encryption cycles completed in: {1} ms", Iterations, elapsed));
+            Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
+            Console.WriteLine("");
 
-            double elapsed = REncrypt(Iterations);
+            Console.WriteLine("Test encryption times using the RLWEN512Q12289 parameter set.");
+            elapsed = Encrypt(Iterations, RLWEParamSets.RLWEN512Q12289);
             Console.WriteLine(string.Format("{0} encryption cycles completed in: {1} ms", Iterations, elapsed));
             Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
             Console.WriteLine("");
         }
 
-        static void FullCycle()
+        static void FullCycle(RLWEParameters Param)
         {
-            RLWEParameters mpar = RLWEParamSets.RLWEN256Q7681; //RLWEN512Q12289
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(mpar);
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
             byte[] enc;
 
-            using (RLWEEncrypt mpe = new RLWEEncrypt(mpar))
+            using (RLWEEncrypt mpe = new RLWEEncrypt(Param))
             {
                 mpe.Initialize(true, akp);
 
@@ -190,58 +214,30 @@ namespace Test
 
         static void KeyGenSpeed(int Iterations = 1000)
         {
-            Console.WriteLine(string.Format("N/Q/Sigma: Key creation average time over {0} passes:", Iterations));
+            Console.WriteLine(string.Format("N | Q | Sigma: Key creation average time over {0} passes:", Iterations));
             Stopwatch runTimer = new Stopwatch();
 
-            double elapsed = N256Q7681(Iterations);
-            Console.WriteLine(string.Format("256/7681/11.31: avg. {0} ms", elapsed / Iterations, Iterations));
+            double elapsed = TestParameter(Iterations, RLWEParamSets.RLWEN256Q7681);
+            Console.WriteLine(string.Format("256 7681 11.31: avg. {0} ms", elapsed / Iterations, Iterations));
             Console.WriteLine(string.Format("{0} keys created in: {1} ms", Iterations, elapsed));
+            Console.WriteLine("");
 
-            elapsed = N512Q12289(Iterations);
-            Console.WriteLine(string.Format("512/12289/12.18: avg. {0} ms", elapsed / Iterations, Iterations));
+            elapsed = TestParameter(Iterations, RLWEParamSets.RLWEN512Q12289);
+            Console.WriteLine(string.Format("512 12289 12.18: avg. {0} ms", elapsed / Iterations, Iterations));
             Console.WriteLine(string.Format("{0} keys created in: {1} ms", Iterations, elapsed));
-
             Console.WriteLine("");
         }
 
-        static double N256Q7681(int Iterations)
+        static double Decrypt(int Iterations, RLWEParameters Param)
         {
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN256Q7681);
-            IAsymmetricKeyPair akp;
-            Stopwatch runTimer = new Stopwatch();
-
-            runTimer.Start();
-            for (int i = 0; i < Iterations; i++)
-                akp = mkgen.GenerateKeyPair();
-            runTimer.Stop();
-
-            return runTimer.Elapsed.TotalMilliseconds;
-        }
-
-        static double N512Q12289(int Iterations)
-        {
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN512Q12289);
-            IAsymmetricKeyPair akp;
-            Stopwatch runTimer = new Stopwatch();
-
-            runTimer.Start();
-            for (int i = 0; i < Iterations; i++)
-                akp = mkgen.GenerateKeyPair();
-            runTimer.Stop();
-
-            return runTimer.Elapsed.TotalMilliseconds;
-        }
-
-        static double RDecrypt(int Iterations)
-        {
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN512Q12289);
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
-            byte[] ptext = new CSPRng().GetBytes(64);
-            byte[] rtext =  new byte[64];
+            byte[] ptext = new CSPRng().GetBytes(Param.N >> 3);
+            byte[] rtext = new byte[Param.N >> 3];
             byte[] ctext;
             Stopwatch runTimer = new Stopwatch();
 
-            using (RLWEEncrypt mpe = new RLWEEncrypt(RLWEParamSets.RLWEN512Q12289))
+            using (RLWEEncrypt mpe = new RLWEEncrypt(Param))
             {
                 mpe.Initialize(true, akp);
                 ctext = mpe.Encrypt(ptext);
@@ -259,15 +255,15 @@ namespace Test
             return runTimer.Elapsed.TotalMilliseconds;
         }
 
-        static double REncrypt(int Iterations)
+        static double Encrypt(int Iterations, RLWEParameters Param)
         {
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(RLWEParamSets.RLWEN512Q12289);
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param);
             IAsymmetricKeyPair akp = mkgen.GenerateKeyPair();
-            byte[] ptext = new CSPRng().GetBytes(64);
+            byte[] ptext = new CSPRng().GetBytes(Param.N >> 3);
             byte[] ctext;
             Stopwatch runTimer = new Stopwatch();
 
-            using (RLWEEncrypt mpe = new RLWEEncrypt(RLWEParamSets.RLWEN512Q12289))
+            using (RLWEEncrypt mpe = new RLWEEncrypt(Param))
             {
                 mpe.Initialize(true, akp);
 
@@ -276,6 +272,20 @@ namespace Test
                     ctext = mpe.Encrypt(ptext);
                 runTimer.Stop();
             }
+
+            return runTimer.Elapsed.TotalMilliseconds;
+        }
+
+        static double TestParameter(int Iterations, RLWEParameters Param)
+        {
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param);
+            IAsymmetricKeyPair akp;
+            Stopwatch runTimer = new Stopwatch();
+
+            runTimer.Start();
+            for (int i = 0; i < Iterations; i++)
+                akp = mkgen.GenerateKeyPair();
+            runTimer.Stop();
 
             return runTimer.Elapsed.TotalMilliseconds;
         }

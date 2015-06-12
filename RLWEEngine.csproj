@@ -79,10 +79,10 @@
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricKey.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricKeyPair.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricParameters.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Algebra\FFT.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Algebra\NTT256.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Algebra\NTT512.cs" />
-    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Algebra\KnuthYao.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Arithmetic\FFT.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Arithmetic\NTT256.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Arithmetic\NTT512.cs" />
+    <Compile Include="Crypto\Cipher\Asymmetric\RLWE\Arithmetic\KnuthYao.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\RLWE\RLWESign.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\RLWE\RLWEEncrypt.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\RLWE\RLWEKeyGenerator.cs" />
