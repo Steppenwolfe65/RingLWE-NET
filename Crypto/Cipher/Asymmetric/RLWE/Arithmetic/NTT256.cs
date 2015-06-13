@@ -45,7 +45,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             7680, 3383, 5756, 1728, 7584, 6569, 6601
         };
 
-        private static readonly byte[] _luT1 =
+        private static readonly byte[] _T1 =
         {
             3,4,1,2,2,8,6,1,3,0,1,9,2,5,5,4,3,4,1,1,2,7,6,11,3,0,1,4,2,4,5,2,3,4,1,2,2,8,6,0,3,0,1,7,2,5,
             5,12,3,4,1,1,2,7,6,9,3,0,1,3,2,4,5,19,3,4,1,2,2,8,6,1,3,0,1,9,2,5,5,0,3,4,1,1,2,7,6,10,3,0,1,
@@ -55,7 +55,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             1,2,2,8,6,0,3,0,1,7,2,5,5,7,3,4,1,1,2,7,6,6,3,0,1,3,2,4,5,22 
         };
 
-        private static readonly byte[] _luT2 =
+        private static readonly byte[] _T2 =
         {
             13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,13,10,7,6,7,6,7,6,7,6,7,6,
             7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,5,4,0,14,0,12,
@@ -64,7 +64,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             7,35,11,0,0,39,12,7,6,37,9,33,17,41,13,8,7,36,11,32,0,40,12,4,6,38,9,34,15,42
         };
 
-        private static readonly int[][] _pMat = 
+        private static readonly int[][] _pMatrix = 
         {
             new int[] {0,0,0,1,0,1,1,0,1,0,0,1,1,1,0,1,0,1,1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,0,1,0,1,0,1,1,0,1,1,0,1,0,1,1,1,0,1,0,0,1,0,1,1,0,0,0,1,0,1,0,0,1,1,0,0,1,1,1,0,0,0,1,1,1,1,1,1,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1,0,1,1,0,1,0,0,1,1,1,0},
             new int[] {0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,1,1,0,1,1,0,1,0,1,1,1,1,0,1,0,1,1,0,0,0,1,0,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1,1,1,1,1,1,1,0,0,1,0,0,1,0,1,0,0,1,0,0},
@@ -513,7 +513,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
                     new Action(()=> GenR1(P)), 
                     new Action(()=> GenR2(R2))
                 };
-                Parallel.ForEach(genList, x => x());/**/
+                Parallel.ForEach(genList, x => x());
             }
             else
             {
@@ -548,7 +548,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             int row, column;
             int index = (int)Rand & 0xFF;
             Rand >>= 8;
-            int sample = _luT1[index];
+            int sample = _T1[index];
             int sampleMsb = sample & 16;
 
             // lookup was successful
@@ -582,7 +582,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
                 if (Rand == NEW_RND_BOTTOM)
                     Rand = GetRand();
 
-                sample = _luT2[index];
+                sample = _T2[index];
                 sampleMsb = sample & 32;
 
                 // lookup was successful
@@ -612,7 +612,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
                         // Read probability-column 0 and count the number of non-zeros
                         for (row = 54; row >= 0; row--)
                         {
-                            distance = distance - _pMat[row][column];
+                            distance = distance - _pMatrix[row][column];
                             if (distance < 0)
                             {
                                 if ((Rand & 1) != 0)
@@ -706,7 +706,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             uint[] encMsg = new uint[M];
 
             for (int i = 0; i < M; i++)
-                encMsg[i] = Msg[i] * QBY2;          // encoding of message
+                encMsg[i] = Msg[i] * QBY2;              // encoding
 
             if (ParallelUtils.IsParallel)
             {

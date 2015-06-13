@@ -118,7 +118,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         private int _mFp;
         private byte[] _oId = new byte[3];
         private bool _isDisposed = false;
-        private Prngs _rndEngine = Prngs.CSPRng;
+        private Prngs _rndEngine = Prngs.CTRPrng;
         #endregion
 
         #region Properties
@@ -190,7 +190,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Engine">The PRNG engine used to power SecureRandom</param>
         /// 
         /// <exception cref="System.ArgumentException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
-        public RLWEParameters(byte[] OId, Prngs Engine = Prngs.CSPRng) :
+        public RLWEParameters(byte[] OId, Prngs Engine = Prngs.CTRPrng) :
             this(DEFAULT_N, DEFAULT_Q, DEFAULT_SIGMA, OId)
         {
             this.RandomEngine = Engine;
@@ -208,7 +208,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <param name="Engine">The PRNG engine used to power SecureRandom</param>
         /// 
         /// <exception cref="RLWEException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
-        public RLWEParameters(int N, int Q, double Sigma, byte[] OId, int MFP = DEFAULT_MFP, Prngs Engine = Prngs.CSPRng)
+        public RLWEParameters(int N, int Q, double Sigma, byte[] OId, int MFP = DEFAULT_MFP, Prngs Engine = Prngs.CTRPrng)
         {
             if (N != 256 && N != 512)
                 throw new RLWEException("RLWEParameters:Ctor", "N is invalid (only 256 or 512 currently supported)!", new ArgumentOutOfRangeException());

@@ -92,7 +92,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         public RLWEKeyGenerator(RLWEParameters CiphersParams)
         {
             _rlweParams = CiphersParams;
-            // XDC, DGCPrng, or CTRPrng only supported in CEX 1.4
+
             if (CiphersParams.RandomEngine == Prngs.PBPrng)
                 throw new RLWEException("RLWEKeyGenerator:Ctor", "Passphrase based, digest, and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
@@ -101,7 +101,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
 
         /// <summary>
         /// Use an initialized prng to generate the key; use this constructor with an Rng that requires pre-initialization, 
-        /// i.e. PBPrng, XDC, or DGCPrng, or CTRPrng
+        /// i.e. PBPrng, DGCPrng, or CTRPrng
         /// </summary>
         /// 
         /// <param name="CiphersParams">The RLWEParameters instance containing thecipher settings</param>
@@ -137,19 +137,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// Get the cipher engine
         /// </summary>
         /// 
-        /// <param name="Engine">The Prng</param>
+        /// <param name="Prng">The Prng</param>
         /// 
         /// <returns>An initialized prng</returns>
-        private IRandom GetPrng(Prngs Engine)
+        private IRandom GetPrng(Prngs Prng)
         {
-            switch (Engine)
+            switch (Prng)
             {
+                case Prngs.CTRPrng:
+                    return new CTRPrng();
+                case Prngs.DGCPrng:
+                    return new DGCPrng();
+                case Prngs.CSPRng:
+                    return new CSPRng();
                 case Prngs.BBSG:
                     return new BBSG();
                 case Prngs.CCG:
                     return new CCG();
-                case Prngs.CSPRng:
-                    return new CSPRng();
                 case Prngs.MODEXPG:
                     return new MODEXPG();
                 case Prngs.QCG1:
@@ -157,7 +161,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    return new CSPRng();
+                    throw new ArgumentException("The Prng type is not supported!");
             }
         }
         #endregion

@@ -5,6 +5,11 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Tools;
+using VTDev.Libraries.CEXEngine.Crypto;
+
+//http://aleph.sagemath.org/?z=eJzLyU9M0VDKKCkpKLbS10_KLEkqTc5OLdHLL0rXz03MSdLPKU_VTU_NSy1KLMkv0i9KLNcvySwAieoVVCpp8nIBWQq2CkGp6allGnm2xgZAoYKizLwSBaAEWFZDEwD2OyF9&lang=sage
+//http://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lwe.html
+//http://www.iacr.org/news/files/2013-04-29lwe-generator.pdf
 
 namespace Test
 {
@@ -24,7 +29,7 @@ namespace Test
             Console.WriteLine("**********************************************");
             Console.WriteLine("* Ring-LWE Encrypt in C# (RLWE Sharp)        *");
             Console.WriteLine("*                                            *");
-            Console.WriteLine("* Release:   v1.0                            *");
+            Console.WriteLine("* Release:   v1.1                            *");
             Console.WriteLine("* Date:      June 8, 2015                    *");
             Console.WriteLine("* Contact:   develop@vtdev.com               *");
             Console.WriteLine("**********************************************");
@@ -167,12 +172,14 @@ namespace Test
             double elapsed = Decrypt(Iterations, RLWEParamSets.RLWEN256Q7681);
             Console.WriteLine(string.Format("{0} decryption cycles completed in: {1} ms", Iterations, elapsed));
             Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
+            Console.WriteLine(string.Format("Decryption Rate is {0} per second", (int)(1000.0 / (elapsed / Iterations))));
             Console.WriteLine("");
 
             Console.WriteLine("Test decryption times using the RLWEN512Q12289 parameter set.");
             elapsed = Decrypt(Iterations, RLWEParamSets.RLWEN512Q12289);
             Console.WriteLine(string.Format("{0} decryption cycles completed in: {1} ms", Iterations, elapsed));
             Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
+            Console.WriteLine(string.Format("Decryption Rate is {0} per second", (int)(1000.0 / (elapsed / Iterations))));
             Console.WriteLine("");
         }
 
@@ -183,12 +190,14 @@ namespace Test
             double elapsed = Encrypt(Iterations, RLWEParamSets.RLWEN256Q7681);
             Console.WriteLine(string.Format("{0} encryption cycles completed in: {1} ms", Iterations, elapsed));
             Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
+            Console.WriteLine(string.Format("Encryption Rate is {0} per second", (int)(1000.0 / (elapsed / Iterations))));
             Console.WriteLine("");
 
             Console.WriteLine("Test encryption times using the RLWEN512Q12289 parameter set.");
             elapsed = Encrypt(Iterations, RLWEParamSets.RLWEN512Q12289);
             Console.WriteLine(string.Format("{0} encryption cycles completed in: {1} ms", Iterations, elapsed));
             Console.WriteLine(string.Format("Ran {0} Iterations in avg. {1} ms.", Iterations, elapsed / Iterations));
+            Console.WriteLine(string.Format("Encryption Rate is {0} per second", (int)(1000.0 / (elapsed / Iterations))));
             Console.WriteLine("");
         }
 
@@ -217,14 +226,16 @@ namespace Test
             Console.WriteLine(string.Format("N | Q | Sigma: Key creation average time over {0} passes:", Iterations));
             Stopwatch runTimer = new Stopwatch();
 
-            double elapsed = TestParameter(Iterations, RLWEParamSets.RLWEN256Q7681);
+            double elapsed = KeyGenerator(Iterations, RLWEParamSets.RLWEN256Q7681);
             Console.WriteLine(string.Format("256 7681 11.31: avg. {0} ms", elapsed / Iterations, Iterations));
             Console.WriteLine(string.Format("{0} keys created in: {1} ms", Iterations, elapsed));
+            Console.WriteLine(string.Format("Creation Rate is {0} keys per second", (int)(1000.0 / (elapsed / Iterations))));
             Console.WriteLine("");
 
-            elapsed = TestParameter(Iterations, RLWEParamSets.RLWEN512Q12289);
+            elapsed = KeyGenerator(Iterations, RLWEParamSets.RLWEN512Q12289);
             Console.WriteLine(string.Format("512 12289 12.18: avg. {0} ms", elapsed / Iterations, Iterations));
             Console.WriteLine(string.Format("{0} keys created in: {1} ms", Iterations, elapsed));
+            Console.WriteLine(string.Format("Creation Rate is {0} keys per second", (int)(1000.0 / (elapsed / Iterations))));
             Console.WriteLine("");
         }
 
@@ -276,9 +287,9 @@ namespace Test
             return runTimer.Elapsed.TotalMilliseconds;
         }
 
-        static double TestParameter(int Iterations, RLWEParameters Param)
+        static double KeyGenerator(int Iterations, RLWEParameters Param)
         {
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param);
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param, new CTRPrng(BlockCiphers.RDX, SeedGenerators.CSPRsg, 16384, 16)/**/); // aes128, default is aes256
             IAsymmetricKeyPair akp;
             Stopwatch runTimer = new Stopwatch();
 

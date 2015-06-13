@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             12288, 10810, 7143, 10984, 3542, 4821, 1170, 5755
         };
 
-        private static byte[] _luT1 =
+        private static byte[] _T1 =
         {
             3,4,1,1,2,8,6,11,3,0,1,7,2,5,5,11,3,4,1,10,2,7,6,6,3,0,1,2,2,4,5,17,3,4,1,1,2,8,6,8,3,0,1,4,2,5,5,4,3,4,1,9,
 	        2,7,6,2,3,0,1,0,2,4,5,21,3,4,1,1,2,8,6,9,3,0,1,7,2,5,5,9,3,4,1,10,2,7,6,3,3,0,1,2,2,4,5,19,3,4,1,1,2,8,6,7,3,
@@ -53,7 +53,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
 	        10,2,7,6,3,3,0,1,2,2,4,5,20,3,4,1,1,2,8,6,7,3,0,1,4,2,5,5,16,3,4,1,9,2,7,6,12,3,0,1,0,2,4,5,24
         };
 
-        private static byte[] _luT2 = 
+        private static byte[] _T2 = 
         {
             14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,14,12,9,8,9,
 	        8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,9,8,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,7,6,
@@ -64,7 +64,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
 	        32,14,40,2,36,10,44
         };
 
-        private static int[][] _pMat =
+        private static int[][] _pMatrix =
         {
             new int[] {0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,0,1,0,0,1,1,1,1,1,1,0,1,1,1,1,0,0,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,0,1,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,1,0,1,1,0,1,1,1,0,1,0,0,0,1,1,1,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,0,1,0,0,1,1,1},
             new int[] {0,0,1,0,1,0,0,1,0,0,1,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,0,1,1,0,0,0,1,0,1,1,1,1,1,1,0,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,1,0,1,0,1,1,0,0,1,1,0,0,0,1,0,0,0,0,0,1,1,1,0,0,1,0,1,0,1},
@@ -550,7 +550,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             int row, column;
             int index = (int)Rand & 0xFF;
             Rand >>= 8;
-            int sample = _luT1[index];
+            int sample = _T1[index];
             int sampleMsb = sample & 16;
 
             // lookup was successful
@@ -584,7 +584,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
                 if (Rand == NEW_RND_BOTTOM)
                     Rand = GetRand();
 
-                sample = _luT2[index];
+                sample = _T2[index];
                 sampleMsb = sample & 32;
 
                 // lookup was successful
@@ -614,7 +614,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
                         // Read probability-column 0 and count the number of non-zeros
                         for (row = 54; row >= 0; row--)
                         {
-                            distance = distance - _pMat[row][column];
+                            distance = distance - _pMatrix[row][column];
                             if (distance < 0)
                             {
                                 if ((Rand & 1) != 0)
