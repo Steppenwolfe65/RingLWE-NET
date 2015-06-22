@@ -44,7 +44,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     /// <summary>
     /// A Ring-LWE public key
     /// </summary>
-    public class RLWEPublicKey : IAsymmetricKey, ICloneable, IDisposable
+    public class RLWEPublicKey : IAsymmetricKey
     {
         #region Fields
         private bool _isDisposed = false;
@@ -96,6 +96,44 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
             _A = A;
             _P = P;
         }
+        
+        /// <summary>
+        /// Reconstructs a public key from its <c>byte</c> array representation.
+        /// </summary>
+        /// 
+        /// <param name="KeyStream">An input stream containing an encoded key</param>
+        /// 
+        /// <exception cref="MPKCException">Thrown if the key could not be loaded</exception>
+        public RLWEPublicKey(Stream KeyStream)
+        {
+            try
+            {
+                BinaryReader reader = new BinaryReader(KeyStream);
+                int len = 0;
+                // num coeffs
+                _N = reader.ReadInt32();
+                // a poly
+                len = reader.ReadInt32();
+                _A = reader.ReadBytes(len);
+                // p poly
+                len = reader.ReadInt32();
+                _P = reader.ReadBytes(len);
+            }
+            catch (IOException ex)
+            {
+                throw new RLWEException("RLWEPublicKey:CTor", "The Public key could not be loaded!", ex);
+            }
+        }
+        
+        /// <summary>
+        /// Reconstructs a public key from its <c>byte</c> array representation.
+        /// </summary>
+        /// 
+        /// <param name="Key">The encoded key array</param>
+        public RLWEPublicKey(byte[] Key) :
+            this(new MemoryStream(Key))
+        {
+        }
 
         private RLWEPublicKey()
         {
@@ -121,15 +159,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <returns>An initialized RLWEPublicKey class</returns>
         public static RLWEPublicKey From(byte[] KeyArray)
         {
-            return From(new MemoryStream(KeyArray));// ToDo: offset/length? for stream?
+            return From(new MemoryStream(KeyArray));
         }
 
         /// <summary>
-        /// Read a Public key from a byte array.
-        /// <para>The stream can contain only the public key.</para>
+        /// Read a Public key from a stream
         /// </summary>
         /// 
-        /// <param name="KeyStream">The byte array containing the key</param>
+        /// <param name="KeyStream">The stream containing the key</param>
         /// 
         /// <returns>An initialized RLWEPublicKey class</returns>
         /// 
@@ -138,7 +175,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         {
             try
             {
-                KeyStream.Seek(0, SeekOrigin.Begin);
                 BinaryReader reader = new BinaryReader(KeyStream);
                 int len = 0;
                 // num coeffs
@@ -154,7 +190,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
             }
             catch (Exception ex)
             {
-                throw new RLWEException("RLWEPrivateKey:Ctor", "The stream could nor be read!", ex);
+                throw new RLWEException("RLWEPrivateKey:Ctor", ex.Message, ex);
             }
         }
 

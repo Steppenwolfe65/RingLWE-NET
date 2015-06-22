@@ -119,7 +119,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// 
         /// <returns>A populated parameter set</returns>
         /// 
-        /// <exception cref="RLWEException">Thrown if an invalid or unknown OId is used.</exception>
+        /// <exception cref="RLWEException">Thrown if an invalid or unknown parameter name is used.</exception>
         public static RLWEParameters FromName(RLWEParamNames Name)
         {
             switch (Name)
@@ -129,7 +129,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
                 case RLWEParamNames.N512Q12289:
                     return (RLWEParameters)RLWEN512Q12289.Clone();
                 default:
-                    return (RLWEParameters)RLWEN512Q12289.Clone();
+                    throw new RLWEException("RLWEParamSets:FromName", "The enumeration name is unknown!", new ArgumentException());
+            }
+        }
+
+        /// <summary>
+        /// Retrieve the OId for a parameter set
+        /// </summary>
+        /// 
+        /// <param name="Name">The enumeration name</param>
+        /// 
+        /// <returns>The 3 byte OId field</returns>
+        /// 
+        /// <exception cref="RLWEException">Thrown if an invalid or unknown parameter name is used.</exception>
+        public static byte[] GetID(RLWEParamNames Name)
+        {
+            switch (Name)
+            {
+                case RLWEParamNames.N256Q7681:
+                    return new byte[] { 2, 2, 0 };
+                case RLWEParamNames.N512Q12289:
+                    return new byte[] { 2, 5, 1 };
+                default:
+                    throw new RLWEException("RLWEParamSets:GetID", "The enumeration name is unknown!", new ArgumentException());
             }
         }
         #endregion

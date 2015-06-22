@@ -111,7 +111,11 @@
         /// <summary>
         /// An implementation of a Hash based Key Derivation PKCS#5 Version 2
         /// </summary>
-        PKCS5
+        PKCS5,
+        /// <summary>
+        /// An implementation of a Salsa20 Counter based DRBG
+        /// </summary>
+        SP20Drbg,
     }
 
     /// <summary>
@@ -154,7 +158,11 @@
         /// <summary>
         /// A Quadratic Congruential Generator II (QCG-II) random number generator
         /// </summary>
-        QCG2
+        QCG2,
+        /// <summary>
+        /// An implementation of a Salsa20 Counter based Prng
+        /// </summary>
+        SP20Prng,
     }
 
     /// <summary>

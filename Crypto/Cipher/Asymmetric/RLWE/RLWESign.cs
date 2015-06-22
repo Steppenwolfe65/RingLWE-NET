@@ -44,7 +44,9 @@ using VTDev.Libraries.CEXEngine.Tools;
 namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
 {
     /// <summary>
-    /// An Ring-LWE One Time Sign (OTS) message sign and verify implementation
+    /// An Ring-LWE One Time Sign (OTS) message sign and verify implementation.
+    /// <para>Sign: uses the specified digest to hash a message; the hash value is then encrypted with a RLWE public key.
+    /// Verify: decrypts the RLWE cipher text, and then compares the value to a hash of the message.</para>
     /// </summary>
     /// 
     /// <example>
@@ -92,7 +94,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     /// 
     /// <description><h4>Code Base Guides:</h4></description>
     /// <list type="table">
-    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">version</see>.</description></item>
+    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">ruandc/Ring-LWE-Encryption</see>.</description></item>
     /// </list> 
     /// </remarks>
     public sealed class RLWESign : IDisposable
@@ -395,12 +397,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
                     return new Keccak512();
                 case Digests.SHA256:
                     return new SHA256();
+                case Digests.SHA512:
+                    return new SHA512();
                 case Digests.Skein256:
                     return new Skein256();
                 case Digests.Skein512:
                     return new Skein512();
                 default:
-                    return new SHA512();
+                    throw new RLWEException("RLWESign:GetDigest", "The digest type is not unsupported!", new ArgumentException());
             }
         }
         #endregion

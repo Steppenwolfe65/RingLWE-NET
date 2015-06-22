@@ -64,11 +64,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         private BlockCiphers _engineType;
         private SeedGenerators _seedType;
         private byte[] _stateSeed;
-        private static byte[] _byteBuffer;
-        private static int _bufferIndex = 0;
-        private static int _bufferSize = 0;
+        private byte[] _byteBuffer;
+        private int _bufferIndex = 0;
+        private int _bufferSize = 0;
         private int _keySize = 0;
-        private static readonly object _objLock = new object();
+        private object _objLock = new object();
         #endregion
 
         #region Properties
@@ -92,6 +92,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// <param name="KeySize">The key size (in bytes) of the symmetric cipher; a <c>0</c> value will auto size the key</param>
         public CTRPrng(BlockCiphers BlockEngine = BlockCiphers.RDX, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int KeySize = 0)
         {
+            if (BufferSize < 64)
+                throw new ArgumentNullException("Buffer size must be at least 64 bytes!");
+
             _engineType = BlockEngine;
             _seedType = SeedEngine;
             _byteBuffer = new byte[BufferSize];
@@ -103,7 +106,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 
             Reset();
         }
-        
+
         /// <summary>
         /// Initialize the class with a Seed; note: the same seed will produce the same random output
         /// </summary>
@@ -114,8 +117,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// 
         /// <exception cref="ArgumentNullException">Thrown if the seed is null</exception>
         /// <exception cref="ArgumentException">Thrown if the seed is too small</exception>
-        public CTRPrng(byte[] Seed, BlockCiphers BlockEngine = BlockCiphers.RDX, int BufferSize = BUFFER_SIZE)
+        public CTRPrng(byte[] Seed, BlockCiphers BlockEngine = BlockCiphers.RDX, int BufferSize = 4096)
         {
+            if (BufferSize < 64)
+                throw new ArgumentNullException("Buffer size must be at least 64 bytes!");
             if (Seed == null)
                 throw new ArgumentNullException("Seed can not be null!");
             if (GetKeySize(BlockEngine) < Seed.Length)
@@ -313,7 +318,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             _rngEngine = GetCipher(_engineType);
             _seedGenerator = GetSeedGenerator(_seedType);
             _rngGenerator = new CTRDrbg(_rngEngine, true, _keySize);
-            
+
             if (_seedGenerator != null)
                 _rngGenerator.Initialize(_seedGenerator.GetSeed(_rngEngine.BlockSize + _keySize));
             else

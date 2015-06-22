@@ -1,4 +1,5 @@
 ﻿#region Directives
+using System;
 using System.IO;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Exceptions;
@@ -46,6 +47,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     public sealed class RLWEKeyPair : IAsymmetricKeyPair
     {
         #region Fields
+        private bool _isDisposed = false;
         private IAsymmetricKey _publicKey;
         private IAsymmetricKey _privateKey;
         #endregion
@@ -109,6 +111,46 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
 
         private RLWEKeyPair()
         {
+        }
+        #endregion
+
+        #region IClone
+        /// <summary>
+        /// Create a copy of this key pair instance
+        /// </summary>
+        /// 
+        /// <returns>The IAsymmetricKeyPair copy</returns>
+        public object Clone()
+        {
+            return new RLWEKeyPair((IAsymmetricKey)_publicKey.Clone(), (IAsymmetricKey)_privateKey.Clone());
+        }
+        #endregion
+
+        #region IDispose
+        /// <summary>
+        /// Dispose of this class
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+                try
+                {
+                    if (_privateKey != null)
+                        ((RLWEPrivateKey)_privateKey).Dispose();
+                    if (_publicKey != null)
+                        ((RLWEPublicKey)_publicKey).Dispose();
+                }
+                catch { }
+
+                _isDisposed = true;
+            }
         }
         #endregion
     }

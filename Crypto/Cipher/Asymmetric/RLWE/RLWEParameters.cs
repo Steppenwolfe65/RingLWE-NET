@@ -43,7 +43,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
 {
     /// <summary>
     /// Creates, reads and writes parameter settings for RLWEEncrypt.
-    /// <para>Predefined parameter sets are available through the <see cref="RLWEParamSets"/> class</para>
+    /// <para>Predefined parameter sets are available through the <see cref="RLWEParamSets"/> class.</para>
     /// </summary>
     /// 
     /// <example>
@@ -54,6 +54,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     ///    mp.WriteTo(ks);
     /// </code>
     /// </example>
+    /// 
+    /// <note>This implementation currently supports only the N256Q7681 and N512Q12289 parameter sets.</note>
     /// 
     /// <revisionHistory>
     /// <revision date="2015/06/07" version="1.0.1.0">Initial release</revision>
@@ -84,10 +86,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     /// 
     /// <description><h4>Code Base Guides:</h4></description>
     /// <list type="table">
-    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">version</see>.</description></item>
+    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">ruandc/Ring-LWE-Encryption</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class RLWEParameters : IAsymmetricParameters, ICloneable, IDisposable
+    public sealed class RLWEParameters : IAsymmetricParameters
     {
         #region Constants
         /// <summary>
@@ -125,15 +127,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// <summary>
         /// Get: Three bytes that uniquely identify the parameter set
         /// </summary>
+        /// 
+        /// <exception cref="RLWEException">Thrown if OId is null or invalid</exception>
         public byte[] OId
         {
             get { return _oId; }
             private set
             {
                 if (value == null)
-                    throw new RLWEException("Oid can not be null!");
+                    throw new RLWEException("RLWEParameters:OId", "Oid can not be null!", new ArgumentNullException());
                 if (value.Length != 3)
-                    throw new RLWEException("Oid must be 3 bytes in length!");
+                    throw new RLWEException("RLWEParameters:OId", "Oid must be 3 bytes in length!", new ArgumentOutOfRangeException());
 
                 _oId = value;
             }

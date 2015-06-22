@@ -1,76 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using VTDev.Libraries.CEXEngine.Crypto.Digest;
-using VTDev.Libraries.CEXEngine.Crypto.Seed;
+﻿#region Directives
+using System;
 using VTDev.Libraries.CEXEngine.Crypto.Generator;
+using VTDev.Libraries.CEXEngine.Crypto.Seed;
+#endregion
 
 namespace VTDev.Libraries.CEXEngine.Crypto.Prng
 {
     /// <summary>
-    /// <h3>DGCPrng: An implementation of a Digest Counter based Random Number Generator.</h3>
-    /// <para>Uses a Digest Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90A</cite></para>
+    /// <h3>CTRPrng: An implementation of a Encryption Counter based Deterministic Random Number Generator.</h3>
+    /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90B</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>IRandom</c> interface:</description>
     /// <code>
     /// int num;
-    /// using (IRandom rnd = new DGCPrng([Digests])
+    /// using (IRandom rnd = new SP20Prng([SeedGenerators], [BufferSize], [SeedSize], [RoundsCount]))
+    /// {
+    ///     // get random int
     ///     num = rnd.Next([Minimum], [Maximum]);
+    /// }
     /// </code>
     /// </example>
     /// 
     /// <revisionHistory>
-    /// <revision date="2015/06/09" version="1.4.0.0">Initial release</revision>
+    /// <revision date="2015/06/14" version="1.4.0.0">Initial release</revision>
     /// </revisionHistory>
-    /// 
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest">VTDev.Libraries.CEXEngine.Crypto.Digest Namespace</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
-    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digests">VTDev.Libraries.CEXEngine.Crypto.Digests Enumeration</seealso>
     /// 
     /// <remarks>
     /// <description><h4>Implementation Notes:</h4></description>
     /// <list type="bullet">
-    /// <item><description>Can be initialized with any <see cref="Digests">digest</see>.</description></item>
-    /// <item><description>Can use either a random seed generator for initialization, or a user supplied Seed array.</description></item>
-    /// <item><description>Numbers generated with the same seed will produce the same random output.</description></item>
+    /// <item><description>Valid Key sizes are 128, 256 (16 and 32 bytes).</description></item>
+    /// <item><description>Block size is 64 bytes wide.</description></item>
+    /// <item><description>Valid rounds are 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28 and 30.</description></item>
+    /// <item><description>Parallel block size is 64,000 bytes by default; but is configurable.</description></item>
     /// </list>
     /// 
     /// <description><h4>Guiding Publications:</h4></description>
     /// <list type="number">
-    /// <item><description>NIST SP800-90A: <see href="http://csrc.nist.gov/publications/nistpubs/800-90A/SP800-90A.pdf">Appendix E1.</see></description></item>
-    /// <item><description>NIST SP800-90B: <see href="http://csrc.nist.gov/publications/drafts/800-90/draft-sp800-90b.pdf">Recommendation for the Entropy Sources Used for Random Bit Generation</see>.</description></item>
-    /// <item><description>NIST Fips 140-2: <see href="http://csrc.nist.gov/publications/fips/fips140-2/fips1402.pdf">Security Requirments For Cryptographic Modules</see>.</description></item>
-    /// <item><description>NIST SP800-22 1a: <see href="http://csrc.nist.gov/groups/ST/toolkit/rng/documents/SP800-22rev1a.pdf">A Statistical Test Suite for Random and Pseudorandom Number Generators for Cryptographic Applications</see>.</description></item>
-    /// <item><description>Security Bounds for the NIST Codebook-based: <see href="http://eprint.iacr.org/2006/379.pdf">Deterministic Random Bit Generator</see>.</description></item>
+    /// <item><description>Salsa20 <see href="http://www.ecrypt.eu.org/stream/salsa20pf.html">Specification</see>.</description></item>
+    /// <item><description>Salsa20 <see href="http://cr.yp.to/snuffle/design.pdf">Design</see>.</description></item>
+    /// <item><description>Salsa20 <see href="http://cr.yp.to/snuffle/security.pdf">Security</see>.</description></item>
     /// </list>
-    /// 
-    /// <description><h4>Code Base Guides:</h4></description>
-    /// <list type="table">
-    /// <item><description>Based on the Bouncy Castle Java <see href="http://bouncycastle.org/latest_releases.html">Release 1.51</see> version.</description></item>
-    /// </list> 
     /// </remarks>
-    public sealed class DGCPrng : IRandom, IDisposable
+
+    public sealed class SP20Prng : IRandom, IDisposable
     {
         #region Constants
-        private const string ALG_NAME = "DGCPrng";
-        private const int BUFFER_SIZE = 1024;
+        private const string ALG_NAME = "SP20Prng";
+        private const int BUFFER_SIZE = 4096;
         #endregion
 
         #region Fields
         private bool _isDisposed = false;
-        private IDigest _digestEngine;
-        private Digests _digestType;
+        private SP20Drbg _rngGenerator;
         private ISeed _seedGenerator;
         private SeedGenerators _seedType;
-        private DGCDrbg _rngGenerator;
         private byte[] _stateSeed;
         private byte[] _byteBuffer;
         private int _bufferIndex = 0;
         private int _bufferSize = 0;
-        private readonly object _objLock = new object();
+        private int _keySize = 0;
+        private int _dfnRounds = 20;
+        private object _objLock = new object();
         #endregion
 
         #region Properties
@@ -88,20 +80,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Initialize the class
         /// </summary>
         /// 
-        /// <param name="DigestEngine">The digest that powers the rng (default is Keccak512)</param>
-        /// <param name="SeedEngine">The Seed engine used to create the salt (default is CSPRsg)</param>
-        /// <param name="BufferSize">The size of the internal state buffer in bytes; must be at least 128 bytes size (default is 1024)</param>
+        /// <param name="SeedEngine">The Seed engine used to create keyng material (default is CSPRsg)</param>
+        /// <param name="BufferSize">The size of the cache of random bytes (must be more than 1024 to enable parallel processing)</param>
+        /// <param name="SeedSize">The size of the seed to generate in bytes; can be 32 for a 128 bit key or 48 for a 256 bit key</param>
+        /// <param name="Rounds">The number of diffusion rounds to use when generating the key stream</param>
         /// 
-        /// <exception cref="ArgumentException">Thrown if the buffer size is too small</exception>
-        public DGCPrng(Digests DigestEngine = Digests.Keccak512, SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = BUFFER_SIZE)
+        /// <exception cref="ArgumentNullException">Thrown if the seed is null</exception>
+        /// <exception cref="ArgumentException">Thrown if the seed is an incorrect size; must be 32 or 48 bytes</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the rounds count is invalid; must be an even number between 10 and 30</exception>
+        public SP20Prng(SeedGenerators SeedEngine = SeedGenerators.CSPRsg, int BufferSize = 4096, int SeedSize = 48, int Rounds = 20)
         {
-            if (BufferSize < 128)
-                throw new ArgumentException("BufferSize must be at least 128 bytes!");
+            if (BufferSize < 64)
+                throw new ArgumentNullException("Buffer size must be at least 64 bytes!");
+            if (SeedSize != 32 && SeedSize != 48)
+                throw new ArgumentException("Seed size must be 32 or 48 bytes (key + iv)!");
+            if (Rounds < 10 || Rounds > 30 || Rounds % 2 > 0)
+                throw new ArgumentOutOfRangeException("Rounds must be an even number between 10 and 30!");
 
-            _digestType = DigestEngine;
+            _dfnRounds = Rounds;
             _seedType = SeedEngine;
             _byteBuffer = new byte[BufferSize];
             _bufferSize = BufferSize;
+            _keySize = SeedSize;
+
             Reset();
         }
 
@@ -109,32 +110,36 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// Initialize the class with a Seed; note: the same seed will produce the same random output
         /// </summary>
         /// 
-        /// <param name="Seed">The Seed bytes used to initialize the digest counter; (min. length is digest blocksize + 8)</param>
-        /// <param name="DigestEngine">The digest that powers the rng (default is Keccak512)</param>
-        /// <param name="BufferSize">The size of the internal state buffer in bytes; must be at least 128 bytes size (default is 1024)</param>
+        /// <param name="Seed">The Seed bytes used to initialize the digest counter; (min. length is key size + iv of 16 bytes)</param>
+        /// <param name="BlockEngine">The block cipher that powers the rng (default is RDX)</param>
+        /// <param name="BufferSize">The size of the cache of random bytes (must be more than 1024 to enable parallel processing)</param>
+        /// <param name="Rounds">The number of diffusion rounds to use when generating the key stream</param>
         /// 
         /// <exception cref="ArgumentNullException">Thrown if the seed is null</exception>
-        /// <exception cref="ArgumentException">Thrown if the seed or buffer size is too small; (min. seed = digest blocksize + 8)</exception>
-        public DGCPrng(byte[] Seed, Digests DigestEngine = Digests.Keccak512, int BufferSize = BUFFER_SIZE)
+        /// <exception cref="ArgumentException">Thrown if the seed is an incorrect size; must be 32 or 48 bytes</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the rounds count is invalid; must be an even number between 10 and 30</exception>
+        public SP20Prng(byte[] Seed, int BufferSize = 4096, int Rounds = 20)
         {
-            if (Seed == null)
-                throw new ArgumentNullException("Seed can not be null!");
-            if (GetMinimumSeedSize(DigestEngine) < Seed.Length)
-                throw new ArgumentException(string.Format("The state seed is too small! must be at least {0} bytes", GetMinimumSeedSize(DigestEngine)));
-            if (BufferSize < 128)
-                throw new ArgumentException("BufferSize must be at least 128 bytes!");
+            if (BufferSize < 64)
+                throw new ArgumentNullException("Buffer size must be at least 64 bytes!");
+            if (Seed.Length != 32 && Seed.Length != 48)
+                throw new ArgumentException("Seed size must be 32 or 48 bytes (key + iv)!");
+            if (Rounds < 10 || Rounds > 30 || Rounds % 2 > 0)
+                throw new ArgumentOutOfRangeException("Rounds must be an even number between 10 and 30!");
 
-            _digestType = DigestEngine;
+            _keySize = Seed.Length;
+            _dfnRounds = Rounds;
             _stateSeed = Seed;
             _byteBuffer = new byte[BufferSize];
             _bufferSize = BufferSize;
+
             Reset();
         }
 
         /// <summary>
         /// Finalize objects
         /// </summary>
-        ~DGCPrng()
+        ~SP20Prng()
         {
             Dispose(false);
         }
@@ -247,15 +252,15 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         }
 
         /// <summary>
-        /// Get a pseudo random 32bit integer
+        /// Get a pseudo random 64bit integer
         /// </summary>
         /// 
-        /// <returns>Random Int32</returns>
+        /// <returns>Random Int64</returns>
         public Int64 NextLong()
         {
             return BitConverter.ToInt64(GetBytes(8), 0);
         }
-        
+
         /// <summary>
         /// Get a ranged pseudo random 64bit integer
         /// </summary>
@@ -297,29 +302,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         /// </summary>
         public void Reset()
         {
-            if (_digestEngine != null)
-            {
-                _digestEngine.Dispose();
-                _digestEngine = null;
-            }
             if (_seedGenerator != null)
             {
                 _seedGenerator.Dispose();
                 _seedGenerator = null;
             }
-
-            _digestEngine = GetDigest(_digestType);
-            _rngGenerator = new DGCDrbg(_digestEngine);
-
-            if (_stateSeed != null)
+            if (_rngGenerator != null)
             {
-                _rngGenerator.Initialize(_stateSeed);
+                _rngGenerator.Dispose();
+                _rngGenerator = null;
             }
+
+            _seedGenerator = GetSeedGenerator(_seedType);
+            _rngGenerator = new SP20Drbg(_dfnRounds);
+
+            if (_seedGenerator != null)
+                _rngGenerator.Initialize(_seedGenerator.GetSeed(_keySize));
             else
-            {
-                _seedGenerator = GetSeedGenerator(_seedType);
-                _rngGenerator.Initialize(_seedGenerator.GetSeed((_digestEngine.BlockSize * 2) + 8));   // 2 * block + counter (2*bs+8)
-            }
+                _rngGenerator.Initialize(_stateSeed);
 
             _rngGenerator.Generate(_byteBuffer);
             _bufferIndex = 0;
@@ -327,6 +327,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
         #endregion
 
         #region Private Methods
+        private byte[] GetBits(byte[] Data, Int64 Maximum)
+        {
+            UInt64[] val = new UInt64[1];
+            Buffer.BlockCopy(Data, 0, val, 0, Data.Length);
+            int bits = Data.Length * 8;
+
+            while (val[0] > (UInt64)Maximum && bits > 0)
+            {
+                val[0] >>= 1;
+                bits--;
+            }
+
+            byte[] ret = new byte[Data.Length];
+            Buffer.BlockCopy(val, 0, ret, 0, Data.Length);
+
+            return ret;
+        }
+
         private byte[] GetByteRange(Int64 Maximum)
         {
             byte[] data;
@@ -351,82 +369,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
             return GetBits(data, Maximum);
         }
 
-        private byte[] GetBits(byte[] Data, Int64 Maximum)
+        private int GetKeySize()
         {
-            UInt64[] val = new UInt64[1];
-            Buffer.BlockCopy(Data, 0, val, 0, Data.Length);
-            int bits = Data.Length * 8;
-
-            while (val[0] > (UInt64)Maximum && bits > 0)
-            {
-                val[0] >>= 1;
-                bits--;
-            }
-
-            byte[] ret = new byte[Data.Length];
-            Buffer.BlockCopy(val, 0, ret, 0, Data.Length);
-
-            return ret;
-        }
-
-        private IDigest GetDigest(Digests RngEngine)
-        {
-            switch (RngEngine)
-            {
-                case Digests.Blake256:
-                    return new Blake256();
-                case Digests.Blake512:
-                    return new Blake512();
-                case Digests.Keccak1024:
-                    return new Keccak1024();
-                case Digests.Keccak256:
-                    return new Keccak256();
-                case Digests.Keccak512:
-                    return new Keccak512();
-                case Digests.SHA256:
-                    return new SHA256();
-                case Digests.SHA512:
-                    return new SHA512();
-                case Digests.Skein1024:
-                    return new Skein1024();
-                case Digests.Skein256:
-                    return new Skein256();
-                case Digests.Skein512:
-                    return new Skein512();
-                default:
-                    return new SHA512();
-            }
-        }
-
-        private int GetMinimumSeedSize(Digests RngEngine)
-        {
-            int ctrLen = 8;
-
-            switch (RngEngine)
-            {
-                case Digests.Blake256:
-                    return ctrLen + 32;
-                case Digests.Blake512:
-                    return ctrLen + 64;
-                case Digests.Keccak1024:
-                    return ctrLen + 72;
-                case Digests.Keccak256:
-                    return ctrLen + 136;
-                case Digests.Keccak512:
-                    return ctrLen + 72;
-                case Digests.SHA256:
-                    return ctrLen + 64;
-                case Digests.SHA512:
-                    return ctrLen + 128;
-                case Digests.Skein1024:
-                    return ctrLen + 128;
-                case Digests.Skein256:
-                    return ctrLen + 32;
-                case Digests.Skein512:
-                    return ctrLen + 64;
-                default:
-                    return ctrLen + 128;
-            }
+            return 48;
         }
 
         private ISeed GetSeedGenerator(SeedGenerators SeedEngine)
@@ -471,6 +416,11 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Prng
                     {
                         Array.Clear(_byteBuffer, 0, _byteBuffer.Length);
                         _byteBuffer = null;
+                    }
+                    if (_stateSeed != null)
+                    {
+                        Array.Clear(_stateSeed, 0, _stateSeed.Length);
+                        _stateSeed = null;
                     }
                 }
                 catch { }

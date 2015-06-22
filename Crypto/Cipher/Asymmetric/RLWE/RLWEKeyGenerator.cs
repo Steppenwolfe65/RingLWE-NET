@@ -73,10 +73,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     /// <item><description>A Simple Provably Secure Key Exchange Scheme Based on the Learning with Errors Problem<cite>RLWE Scheme</cite>.</description></item>
     /// <item><description>The Knuth-Yao Quadrangle-Inequality Speedup is a Consequence of Total-Monotonicity<cite>Knuth-Yao Quadrangle-Inequality Speedup</cite>.</description></item>
     /// </list>
+    /// 
+    /// <description><h4>Code Base Guides:</h4></description>
+    /// <list type="table">
+    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">ruandc/Ring-LWE-Encryption</see>.</description></item>
+    /// </list> 
     /// </remarks>
-    public sealed class RLWEKeyGenerator
+    public sealed class RLWEKeyGenerator : IAsymmetricGenerator
     {
         #region Fields
+        private bool _isDisposed;
         private RLWEParameters _rlweParams;
         private IRandom _rngEngine;
         #endregion
@@ -88,7 +94,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// 
         /// <param name="CiphersParams">The RLWEParameters instance containing the cipher settings</param>
         /// 
-        /// <exception cref="RLWEException">Thrown if a Prng that requires pre-initialization is used; (wrong constructor)</exception>
+        /// <exception cref="RLWEException">Thrown if a Prng that requires pre-initialization is specified; (wrong constructor)</exception>
         public RLWEKeyGenerator(RLWEParameters CiphersParams)
         {
             _rlweParams = CiphersParams;
@@ -114,6 +120,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
 
         private RLWEKeyGenerator()
         {
+        }
+
+        /// <summary>
+        /// Finalize objects
+        /// </summary>
+        ~RLWEKeyGenerator()
+        {
+            Dispose(false);
         }
         #endregion
 
@@ -146,6 +160,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
             {
                 case Prngs.CTRPrng:
                     return new CTRPrng();
+                case Prngs.SP20Prng:
+                    return new SP20Prng();
                 case Prngs.DGCPrng:
                     return new DGCPrng();
                 case Prngs.CSPRng:
@@ -161,7 +177,41 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    throw new ArgumentException("The Prng type is not supported!");
+                    throw new RLWEException("RLWEEncrypt:GetPrng", "The Prng type is not supported!", new ArgumentException());
+            }
+        }
+        #endregion
+
+        #region IDispose
+        /// <summary>
+        /// Dispose of this class
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+                try
+                {
+                    if (_rlweParams != null)
+                    {
+                        _rlweParams.Dispose();
+                        _rlweParams = null;
+                    }
+                    if (_rngEngine != null)
+                    {
+                        _rngEngine.Dispose();
+                        _rngEngine = null;
+                    }
+                }
+                catch { }
+
+                _isDisposed = true;
             }
         }
         #endregion

@@ -281,7 +281,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             return 32;
         }
 
-        private static byte[] Convert32To8(uint[] Source)
+        private byte[] Convert32To8(uint[] Source)
         {
             byte[] data = new byte[Source.Length * 2];
 
@@ -291,7 +291,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             return data;
         }
 
-        private static uint[] Convert8To32(byte[] Source)
+        private uint[] Convert8To32(byte[] Source)
         {
             uint[] data = new uint[Source.Length / 2];
 
@@ -301,7 +301,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             return data;
         }
 
-        private static byte[] Decode(uint[] A)
+        private byte[] Decode(uint[] A)
         {
             byte[] r = new byte[A.Length / 8];
             for (int i = 0, j = 0; i < r.Length; i++, j += 8)
@@ -319,7 +319,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             return r;
         }
 
-        private static uint[] Encode(byte[] A)
+        private uint[] Encode(byte[] A)
         {
             uint[] r = new uint[A.Length * 8];
             for (int i = 0, j = 0; i < A.Length; i++, j += 8)
@@ -509,13 +509,13 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
         {
             if (ParallelUtils.IsParallel)
             {
-                var genList = new List<Action> 
+                Action[] gA = new Action[] 
                 { 
                     new Action(()=> GenA(A)), 
                     new Action(()=> GenR1(P)), 
                     new Action(()=> GenR2(R2))
                 };
-                Parallel.ForEach(genList, x => x());
+                Parallel.Invoke(gA);
             }
             else
             {
@@ -636,7 +636,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             return 0;
         }
 
-        private static uint Mod(int A)
+        private uint Mod(int A)
         {
             int quotient, remainder;
             quotient = A / MODULUS;
@@ -649,7 +649,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
             return (uint)remainder;
         }
 
-        private static void QBDecode(uint[] Cpt1)
+        private void QBDecode(uint[] Cpt1)
         {
             for (int i = 0; i < M; i++)
             {
@@ -712,23 +712,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
 
             if (ParallelUtils.IsParallel)
             {
-                var knyList = new List<Action> 
+                Action[] kA = new Action[]
                 { 
                     new Action(()=> KnuthYao(e1)), 
                     new Action(()=> KnuthYao(e2)), 
                     new Action(()=> KnuthYao(e3))
                 };
-                Parallel.ForEach(knyList, x => x());
+                Parallel.Invoke(kA);
 
                 FFT.Add2(e3, e3, encMsg, MODULUS);  // e3 <-- e3 + m
 
-                var nttList = new List<Action> 
+                Action[] nA = new Action[]
                 { 
                     new Action(()=> FwdNTT(e1)), 
                     new Action(()=> FwdNTT(e2)), 
                     new Action(()=> FwdNTT(e3))
                 };
-                Parallel.ForEach(nttList, x => x());
+                Parallel.Invoke(nA);
 
                 // m <-- a*e1
                 FFT.Mul2(C1, A, e1, MODULUS); 	    // c1 <-- a*e1
@@ -736,12 +736,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE.Arithmetic
                 FFT.Mul2(C2, P, e1, MODULUS); 		// c2 <-- p*e1
                 FFT.Add2(C2, e3, C2, MODULUS);	    // c2<-- e3 + p*e1
 
-                var rearr = new List<Action> 
+                Action[] rA = new Action[]
                 { 
                     new Action(()=> Rearrange(C1)), 
                     new Action(()=> Rearrange(C2))
                 };
-                Parallel.ForEach(rearr, x => x());
+                Parallel.Invoke(rA);
             }
             else
             {

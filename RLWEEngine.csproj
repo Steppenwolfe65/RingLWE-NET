@@ -75,6 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmerticGenerator.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricCipher.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricKey.cs" />
     <Compile Include="Crypto\Cipher\Asymmetric\Interfaces\IAsymmetricKeyPair.cs" />
@@ -101,6 +102,8 @@
     <Compile Include="Crypto\Cipher\Symmetric\Block\TFX.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\THX.cs" />
     <Compile Include="Crypto\Cipher\Symmetric\Block\TSM.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Stream\IStreamCipher.cs" />
+    <Compile Include="Crypto\Cipher\Symmetric\Stream\Salsa20.cs" />
     <Compile Include="Crypto\Digest\Blake256.cs" />
     <Compile Include="Crypto\Digest\Blake512.cs" />
     <Compile Include="Crypto\Digest\IDigest.cs" />
@@ -119,6 +122,7 @@
     <Compile Include="Crypto\Generator\KDF2Drbg.cs" />
     <Compile Include="Crypto\Generator\PBKDF2.cs" />
     <Compile Include="Crypto\Generator\PKCS5.cs" />
+    <Compile Include="Crypto\Generator\SP20Drbg.cs" />
     <Compile Include="Crypto\Helper\Enums.cs" />
     <Compile Include="Crypto\Helper\KeyParams.cs" />
     <Compile Include="Crypto\Mac\HMAC.cs" />
@@ -136,6 +140,7 @@
     <Compile Include="Crypto\Prng\QCG1.cs" />
     <Compile Include="Crypto\Prng\QCG2.cs" />
     <Compile Include="Crypto\Prng\SecureRandom.cs" />
+    <Compile Include="Crypto\Prng\SP20Prng.cs" />
     <Compile Include="Crypto\Seed\CSPRsg.cs" />
     <Compile Include="Crypto\Seed\ISeed.cs" />
     <Compile Include="Crypto\Seed\XSPRsg.cs" />

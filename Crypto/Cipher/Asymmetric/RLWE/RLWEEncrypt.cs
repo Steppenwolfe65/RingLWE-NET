@@ -96,10 +96,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
     /// 
     /// <description><h4>Code Base Guides:</h4></description>
     /// <list type="table">
-    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">version</see>.</description></item>
+    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">ruandc/Ring-LWE-Encryption</see>.</description></item>
     /// </list> 
     /// </remarks>
-    public sealed class RLWEEncrypt : IAsymmetricCipher, IDisposable
+    public sealed class RLWEEncrypt : IAsymmetricCipher
     {
         #region Fields
         private bool _isDisposed = false;
@@ -329,19 +329,25 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
         /// Get the cipher engine
         /// </summary>
         /// 
-        /// <param name="Engine">The Prng</param>
+        /// <param name="Prng">The Prng</param>
         /// 
         /// <returns>An initialized prng</returns>
-        private IRandom GetPrng(Prngs Engine)
+        private IRandom GetPrng(Prngs Prng)
         {
-            switch (Engine)
+            switch (Prng)
             {
+                case Prngs.CTRPrng:
+                    return new CTRPrng();
+                case Prngs.SP20Prng:
+                    return new SP20Prng();
+                case Prngs.DGCPrng:
+                    return new DGCPrng();
+                case Prngs.CSPRng:
+                    return new CSPRng();
                 case Prngs.BBSG:
                     return new BBSG();
                 case Prngs.CCG:
                     return new CCG();
-                case Prngs.CSPRng:
-                    return new CSPRng();
                 case Prngs.MODEXPG:
                     return new MODEXPG();
                 case Prngs.QCG1:
@@ -349,7 +355,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE
                 case Prngs.QCG2:
                     return new QCG2();
                 default:
-                    return new CSPRng();
+                    throw new RLWEException("RLWEEncrypt:GetPrng", "The Prng type is not supported!", new ArgumentException());
             }
         }
         #endregion

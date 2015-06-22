@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Diagnostics;
 using Test.Tests;
+using VTDev.Libraries.CEXEngine.Crypto;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
 using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Tools;
-using VTDev.Libraries.CEXEngine.Crypto;
 
-//http://aleph.sagemath.org/?z=eJzLyU9M0VDKKCkpKLbS10_KLEkqTc5OLdHLL0rXz03MSdLPKU_VTU_NSy1KLMkv0i9KLNcvySwAieoVVCpp8nIBWQq2CkGp6allGnm2xgZAoYKizLwSBaAEWFZDEwD2OyF9&lang=sage
-//http://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lwe.html
-//http://www.iacr.org/news/files/2013-04-29lwe-generator.pdf
+// look into..
+// http://aleph.sagemath.org/?z=eJzLyU9M0VDKKCkpKLbS10_KLEkqTc5OLdHLL0rXz03MSdLPKU_VTU_NSy1KLMkv0i9KLNcvySwAieoVVCpp8nIBWQq2CkGp6allGnm2xgZAoYKizLwSBaAEWFZDEwD2OyF9&lang=sage
+// http://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lwe.html
+// http://www.iacr.org/news/files/2013-04-29lwe-generator.pdf
 
 namespace Test
 {
@@ -24,7 +25,7 @@ namespace Test
             ConsoleUtils.SizeConsole(80, 60);
             ConsoleUtils.CenterConsole();
             Console.Title = "RLWE Sharp Test Suite";
-            
+
             // header
             Console.WriteLine("**********************************************");
             Console.WriteLine("* Ring-LWE Encrypt in C# (RLWE Sharp)        *");
@@ -289,7 +290,8 @@ namespace Test
 
         static double KeyGenerator(int Iterations, RLWEParameters Param)
         {
-            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param, new CTRPrng(BlockCiphers.RDX, SeedGenerators.CSPRsg, 16384, 16)/**/); // aes128, default is aes256
+            // new SP20Prng(SeedGenerators.CSPRsg, 16384, 32, 10) // salsa20
+            RLWEKeyGenerator mkgen = new RLWEKeyGenerator(Param, new CTRPrng(BlockCiphers.RDX, SeedGenerators.CSPRsg, 16384, 16)); // aes128
             IAsymmetricKeyPair akp;
             Stopwatch runTimer = new Stopwatch();
 

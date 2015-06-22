@@ -36,14 +36,14 @@ using VTDev.Libraries.CEXEngine.Crypto.Cipher.Symmetric.Block;
 namespace VTDev.Libraries.CEXEngine.Crypto.Generator
 {
     /// <summary>
-    /// <h3>CTRDRBG: An implementation of a Encryption Counter based Deterministic Random Byte Generator.</h3>
+    /// <h3>CTRDrbg: An implementation of a Encryption Counter based Deterministic Random Byte Generator.</h3>
     /// <para>A Block Cipher Counter DRBG as outlined in NIST document: SP800-90A<cite>SP800-90B</cite></para>
     /// </summary> 
     /// 
     /// <example>
     /// <description>Example using an <c>IGenerator</c> interface:</description>
     /// <code>
-    /// using (IGenerator rnd = new CTRDRBG(new RDX()))
+    /// using (IGenerator rnd = new CTRDrbg(new RDX()))
     /// {
     ///     // initialize
     ///     rnd.Initialize(Salt, [Ikm], [Nonce]);
@@ -83,7 +83,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
     public sealed class CTRDrbg : IGenerator, IDisposable
     {
         #region Constants
-        private const string ALG_NAME = "CTRDRBG";
+        private const string ALG_NAME = "CTRDrbg";
         private const int BLOCK_SIZE = 16;
         private const int COUNTER_SIZE = 16;
         private const Int32 MAX_PARALLEL = 1024000;
@@ -99,42 +99,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         private bool _isInitialized = false;
         private bool _isParallel = false;
         private int _keySize = 32 + COUNTER_SIZE;
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates a CTR Bytes Generator using a block cipher
-        /// </summary>
-        /// 
-        /// <param name="Cipher">The block cipher</param>
-        /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
-        /// <param name="KeySize">The key size (in bytes) of the symmetric cipher; a <c>0</c> value will auto size the key</param>
-        public CTRDrbg(IBlockCipher Cipher, bool DisposeEngine = true, int KeySize = 0)
-        {
-            _disposeEngine = DisposeEngine;
-            _Cipher = Cipher;
-
-            if (KeySize > 0)
-                _keySize = KeySize;
-            else
-                _keySize = GetKeySize();
-
-            _blockSize = _Cipher.BlockSize;
-
-            ProcessorCount = Environment.ProcessorCount;
-            if (ProcessorCount % 2 != 0)
-                ProcessorCount--;
-
-            IsParallel = ProcessorCount > 1;
-        }
-
-        /// <summary>
-        /// Finalize objects
-        /// </summary>
-        ~CTRDrbg()
-        {
-            Dispose(false);
-        }
         #endregion
 
         #region Properties
@@ -198,6 +162,42 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Generator
         public static int ParallelMinimumSize
         {
             get { return MIN_PARALLEL; }
+        }
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Creates a CTR Bytes Generator using a block cipher
+        /// </summary>
+        /// 
+        /// <param name="Cipher">The block cipher</param>
+        /// <param name="DisposeEngine">Dispose of digest engine when <see cref="Dispose()"/> on this class is called</param>
+        /// <param name="KeySize">The key size (in bytes) of the symmetric cipher; a <c>0</c> value will auto size the key</param>
+        public CTRDrbg(IBlockCipher Cipher, bool DisposeEngine = true, int KeySize = 0)
+        {
+            _disposeEngine = DisposeEngine;
+            _Cipher = Cipher;
+
+            if (KeySize > 0)
+                _keySize = KeySize;
+            else
+                _keySize = GetKeySize();
+
+            _blockSize = _Cipher.BlockSize;
+
+            ProcessorCount = Environment.ProcessorCount;
+            if (ProcessorCount % 2 != 0)
+                ProcessorCount--;
+
+            IsParallel = ProcessorCount > 1;
+        }
+
+        /// <summary>
+        /// Finalize objects
+        /// </summary>
+        ~CTRDrbg()
+        {
+            Dispose(false);
         }
         #endregion
 
