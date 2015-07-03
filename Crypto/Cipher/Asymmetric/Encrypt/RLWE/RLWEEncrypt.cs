@@ -1,0 +1,390 @@
+﻿#region Directives
+using System;
+using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.Arithmetic;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
+using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
+using VTDev.Libraries.CEXEngine.Crypto.Prng;
+using VTDev.Libraries.CEXEngine.Exceptions;
+using VTDev.Libraries.CEXEngine.Utility;
+#endregion
+
+#region License Information
+// The MIT License (MIT)
+// 
+// Copyright (c) 2015 John Underhill
+// This file is part of the CEX Cryptographic library.
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// 
+// Principal Algorithms:
+// The Ring-LWE Asymmetric Cipher
+// 
+// Implementation Details:
+// An implementation based on the description in the paper 'Efficient Software Implementation of Ring-LWE Encryption' 
+// https://eprint.iacr.org/2014/725.pdf and accompanying Github project: https://github.com/ruandc/Ring-LWE-Encryption
+// Written by John Underhill, June 8, 2015
+// contact: develop@vtdev.com
+#endregion
+
+namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
+{
+    /// <summary>
+    /// An Ring-LWE cipher implementation
+    /// </summary>
+    /// 
+    /// <example>
+    /// <description>Example of encrypting and decrypting an array:</description>
+    /// <code>
+    /// RLWEParameters encParams = new RLWEParameters(512, 12289, 12.18, new byte[] { 2, 5, 1 }))
+    /// RLWEKeyGenerator keyGen = new RLWEKeyGenerator(encParams);
+    /// IAsymmetricKeyPair keyPair = keyGen.GenerateKeyPair();
+    /// 
+    /// byte[] data = new byte[64];
+    /// byte[] enc, dec;
+    /// 
+    /// // encrypt an array
+    /// using (RLWEEncrypt cipher = new RLWEEncrypt(encParams))
+    /// {
+    ///     cipher.Initialize(true, new RLWEKeyPair(keyPair.PublicKey));
+    ///     enc = cipher.Encrypt(data);
+    /// }
+    /// 
+    /// // decrypt the cipher text
+    /// using (RLWEEncrypt cipher = new RLWEEncrypt(encParams))
+    /// {
+    ///     cipher.Initialize(false, new RLWEKeyPair(keyPair.PrivateKey));
+    ///     dec = cipher.Decrypt(enc);
+    /// }
+    /// </code>
+    /// </example>
+    /// 
+    /// <revisionHistory>
+    /// <revision date="2015/06/07" version="1.4.0.0">Initial release</revision>
+    /// </revisionHistory>
+    /// 
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEPublicKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE RLWEPublicKey Class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE.RLWEPrivateKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE RLWEPrivateKey Class</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKeyPair">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKeyPair Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces.IAsymmetricKey">VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces IAsymmetricKey Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest">VTDev.Libraries.CEXEngine.Crypto.Digest.IDigest Interface</seealso>
+    /// <seealso cref="VTDev.Libraries.CEXEngine.Crypto.Enumeration.Digests">VTDev.Libraries.CEXEngine.Crypto.Enumeration Digests Enumeration</seealso>
+    /// 
+    /// <remarks>
+    /// <description><h4>Guiding Publications:</h4></description>
+    /// <list type="number">
+    /// <item><description>Efficient Software Implementation of Ring-LWE Encryption<cite>Ring-LWE Encryption</cite>.</description></item>
+    /// <item><description>Compact Ring-LWE Cryptoprocessor<cite>Ring-LWE Cryptoprocessor</cite>.</description></item>
+    /// <item><description>A Simple Provably Secure Key Exchange Scheme Based on the Learning with Errors Problem<cite>RLWE Scheme</cite>.</description></item>
+    /// <item><description>The Knuth-Yao Quadrangle-Inequality Speedup is a Consequence of Total-Monotonicity<cite>Knuth-Yao Quadrangle-Inequality Speedup</cite>.</description></item>
+    /// </list>
+    /// 
+    /// <description><h4>Code Base Guides:</h4></description>
+    /// <list type="table">
+    /// <item><description>Based on the Ring-LWE-Encryption C version: <see href="https://github.com/ruandc/Ring-LWE-Encryption">ruandc/Ring-LWE-Encryption</see>.</description></item>
+    /// </list> 
+    /// </remarks>
+    public sealed class RLWEEncrypt : IAsymmetricCipher
+    {
+        #region Fields
+        private bool _isDisposed = false;
+        private bool _isInitialized = false;
+        private bool _isEncryption = false;
+        private int _maxPlainText;
+        private int _maxCipherText;
+        private IRandom _rndEngine;
+        private int _N;
+        private int _Q;
+        private double _Sigma;
+        private int _mFp;
+        private RLWEKeyPair _keyPair;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Get: The maximum number of bytes the cipher can encrypt
+        /// </summary>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized</exception>
+        public int MaxCipherText
+        {
+            get 
+            {
+                if (_maxCipherText == 0 || !_isInitialized)
+                    throw new CryptoAsymmetricException("RLWEEncrypt:MaxCipherText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
+
+                return _maxCipherText; 
+            }
+        }
+
+        /// <summary>
+        /// Get: The maximum number of bytes the cipher can decrypt
+        /// </summary>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized</exception>
+        public int MaxPlainText
+        {
+            get 
+            {
+                if (_maxPlainText == 0 || !_isInitialized)
+                    throw new CryptoAsymmetricException("RLWEEncrypt:MaxPlainText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
+
+                return _maxPlainText; 
+            }
+        }
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initialize this class; Prng is created automatically
+        /// </summary>
+        /// 
+        /// <param name="CipherParams">The cipher engine</param>
+        public RLWEEncrypt(RLWEParameters CipherParams)
+        {
+            _rndEngine = GetPrng(CipherParams.RandomEngine);
+            _N = CipherParams.N;
+            _Q = CipherParams.Q;
+            _Sigma = CipherParams.Sigma;
+            _mFp = CipherParams.MFP;
+
+            if (CipherParams.N == 256)
+            {
+                _maxPlainText = 32;
+                _maxCipherText = 32;
+            }
+            else
+            {
+                _maxPlainText = 64;
+                _maxCipherText = 64;
+            }
+        }
+
+        /// <summary>
+        /// Initialize this class with an initialized Prng
+        /// </summary>
+        /// 
+        /// <param name="CipherParams">The cipher parameters</param>
+        /// <param name="Engine">The initialized cipher prng</param>
+        public RLWEEncrypt(RLWEParameters CipherParams, IRandom Engine)
+        {
+            _rndEngine = Engine;
+        }
+
+        private RLWEEncrypt()
+        {
+        }
+
+        /// <summary>
+        /// Finalize objects
+        /// </summary>
+        ~RLWEEncrypt()
+        {
+            Dispose(false);
+        }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Decrypt a cipher text
+        /// </summary>
+        /// 
+        /// <param name="Input">The cipher text</param>
+        /// 
+        /// <returns>The plain text</returns>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized</exception>
+        public byte[] Decrypt(byte[] Input)
+        {
+            if (!_isInitialized)
+                throw new CryptoAsymmetricException("RLWEEncrypt:Decrypt", "The cipher has not been initialized!", new InvalidOperationException());
+
+            int plen = _N >> 3;
+
+            if (_N == 512)
+            {
+                NTT512 ntt = new NTT512(_rndEngine);
+                return ntt.Decrypt((RLWEPrivateKey)_keyPair.PrivateKey, Input).SubArray(_mFp, plen - _mFp);
+            }
+            else
+            {
+                NTT256 ntt = new NTT256(_rndEngine);
+                return ntt.Decrypt((RLWEPrivateKey)_keyPair.PrivateKey, Input).SubArray(_mFp, plen - _mFp);
+            }
+        }
+
+        /// <summary>
+        /// Encrypt a plain text message
+        /// </summary>
+        /// 
+        /// <param name="Input">The plain text</param>
+        /// 
+        /// <returns>The cipher text</returns>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized, or input text is too long</exception>
+        public byte[] Encrypt(byte[] Input)
+        {
+            if (!_isInitialized)
+                throw new CryptoAsymmetricException("RLWEEncrypt:Encrypt", "The cipher has not been initialized!", new InvalidOperationException());
+            if (Input.Length > _maxPlainText - _mFp)
+                throw new CryptoAsymmetricException("RLWEEncrypt:Encrypt", "The input text is too long!", new ArgumentOutOfRangeException());
+
+            int plen = _N >> 3;
+
+            if (_N == 512)
+            {
+                NTT512 ntt = new NTT512(_rndEngine);
+                byte[] ptx = new byte[plen];
+
+                if (Input.Length < _maxPlainText)
+                {
+                    ptx = _rndEngine.GetBytes(plen);
+                    Array.Copy(Input, 0, ptx, _mFp, Input.Length);
+                }
+                else
+                {
+                    Array.Copy(Input, 0, ptx, 0, Input.Length);
+                }
+
+                return ntt.Encrypt((RLWEPublicKey)_keyPair.PublicKey, ptx);
+            }
+            else
+            {
+                NTT256 ntt = new NTT256(_rndEngine);
+                byte[] ptx = new byte[plen];
+
+                if (Input.Length < _maxPlainText)
+                {
+                    ptx = _rndEngine.GetBytes(plen);
+                    Array.Copy(Input, 0, ptx, _mFp, Input.Length);
+                }
+                else
+                {
+                    Array.Copy(Input, 0, ptx, 0, Input.Length);
+                }
+
+                return ntt.Encrypt((RLWEPublicKey)_keyPair.PublicKey, ptx);
+            }
+        }
+
+        /// <summary>
+        /// Return the key size of the working key
+        /// </summary>
+        /// 
+        /// <param name="Key">The key</param>
+        /// 
+        /// <returns>The size of the key</returns>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized, or key is invalid</exception>
+        public int GetKeySize(IAsymmetricKey Key)
+        {
+            if (!_isInitialized)
+                throw new CryptoAsymmetricException("RLWEEncrypt:GetKeySize", "The cipher has not been initialized!", new InvalidOperationException());
+
+            if (Key is RLWEPublicKey)
+                return ((RLWEPublicKey)Key).N;
+            if (Key is RLWEPrivateKey)
+                return ((RLWEPrivateKey)Key).N;
+
+            throw new CryptoAsymmetricException("RLWEEncrypt:GetKeySize", "Unsupported key type!", new InvalidDataException());
+        }
+
+        /// <summary>
+        /// Initialize the cipher.
+        /// <para>Requires a <see cref="RLWEPublicKey"/> for encryption, or a <see cref="RLWEPrivateKey"/> for decryption</para>
+        /// </summary>
+        /// 
+        /// <param name="Encryption">When true cipher is for encryption, if false, decryption</param>
+        /// <param name="KeyPair">The <see cref="IAsymmetricKeyPair"/> containing the RLWE public or private key</param>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized</exception>
+        public void Initialize(bool Encryption, IAsymmetricKeyPair KeyPair)
+        {
+            if (!(KeyPair is RLWEKeyPair))
+                throw new CryptoAsymmetricException("RLWEEncrypt:Initialize", "Not a valid RLWE key pair!", new InvalidDataException());
+
+            _isEncryption = Encryption;
+            _keyPair = (RLWEKeyPair)KeyPair;
+            _isInitialized = true;
+        }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Get the cipher engine
+        /// </summary>
+        /// 
+        /// <param name="Prng">The Prng</param>
+        /// 
+        /// <returns>An initialized prng</returns>
+        private IRandom GetPrng(Prngs Prng)
+        {
+            switch (Prng)
+            {
+                case Prngs.CTRPrng:
+                    return new CTRPrng();
+                case Prngs.SP20Prng:
+                    return new SP20Prng();
+                case Prngs.DGCPrng:
+                    return new DGCPrng();
+                case Prngs.CSPRng:
+                    return new CSPRng();
+                case Prngs.BBSG:
+                    return new BBSG();
+                case Prngs.CCG:
+                    return new CCG();
+                case Prngs.MODEXPG:
+                    return new MODEXPG();
+                case Prngs.QCG1:
+                    return new QCG1();
+                case Prngs.QCG2:
+                    return new QCG2();
+                default:
+                    throw new CryptoAsymmetricException("RLWEEncrypt:GetPrng", "The Prng type is not supported!", new ArgumentException());
+            }
+        }
+        #endregion
+
+        #region IDispose
+        /// <summary>
+        /// Dispose of this class
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool Disposing)
+        {
+            if (!_isDisposed && Disposing)
+            {
+                try
+                {
+                    _maxPlainText = 0;
+                    _maxCipherText = 0;
+                }
+                catch { }
+
+                _isDisposed = true;
+            }
+        }
+        #endregion
+    }
+}

@@ -1,8 +1,6 @@
 ﻿using System;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Interfaces;
-using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.RLWE;
-using VTDev.Libraries.CEXEngine.Tools;
 using System.IO;
+using VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE;
 
 namespace Test.Tests
 {

@@ -2,3 +2,7 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\bin\
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\bin\Release\RLWEEngine.pdb
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\obj\Release\RLWEEngine.dll
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\obj\Release\RLWEEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\bin\Release\RLWEEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\bin\Release\RLWEEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\obj\Release\RLWEEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\obj\Release\RLWEEngine.pdb

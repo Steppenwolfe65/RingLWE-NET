@@ -5,3 +5,10 @@ C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\Test
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\Test\obj\Release\Test.csprojResolveAssemblyReference.cache
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\Test\obj\Release\Test.exe
 C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\RLWE Sharp\Test\obj\Release\Test.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\Test\bin\Release\Test.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\Test\bin\Release\Test.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\Test\bin\Release\RLWEEngine.dll
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\Test\bin\Release\RLWEEngine.pdb
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\Test\obj\Release\Test.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\Test\obj\Release\Test.exe
+C:\Users\John\Documents\Visual Studio 2010\Projects\Cryptography\Ring-LWE\Test\obj\Release\Test.pdb
