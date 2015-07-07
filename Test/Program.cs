@@ -210,11 +210,11 @@ namespace Test
 
             using (RLWEEncrypt mpe = new RLWEEncrypt(Param))
             {
-                mpe.Initialize(true, akp);
+                mpe.Initialize(akp.PublicKey);
 
                 byte[] data = new byte[mpe.MaxPlainText];
                 enc = mpe.Encrypt(data);
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
                 if (!Compare.AreEqual(dec, data))
@@ -251,9 +251,9 @@ namespace Test
 
             using (RLWEEncrypt mpe = new RLWEEncrypt(Param))
             {
-                mpe.Initialize(true, akp);
+                mpe.Initialize(akp.PublicKey);
                 ctext = mpe.Encrypt(ptext);
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
 
                 runTimer.Start();
                 for (int i = 0; i < Iterations; i++)
@@ -277,7 +277,7 @@ namespace Test
 
             using (RLWEEncrypt mpe = new RLWEEncrypt(Param))
             {
-                mpe.Initialize(true, akp);
+                mpe.Initialize(akp.PublicKey);
 
                 runTimer.Start();
                 for (int i = 0; i < Iterations; i++)

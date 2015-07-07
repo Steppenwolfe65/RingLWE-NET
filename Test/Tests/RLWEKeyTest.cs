@@ -101,7 +101,7 @@ namespace Test.Tests
 
             using (RLWEEncrypt mpe = new RLWEEncrypt(mpar))
             {
-                mpe.Initialize(true, akp);
+                mpe.Initialize(akp.PublicKey);
 
                 int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
@@ -109,7 +109,7 @@ namespace Test.Tests
 
                 enc = mpe.Encrypt(data);
 
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
                 if (!Compare.AreEqual(dec, data))

@@ -83,10 +83,24 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// </remarks>
     public sealed class RLWEKeyGenerator : IAsymmetricGenerator
     {
+        #region Constants
+        private const string ALG_NAME = "RLWEKeyGenerator";
+        #endregion
+
         #region Fields
         private bool _isDisposed;
         private RLWEParameters _rlweParams;
         private IRandom _rngEngine;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Get: Generator name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
+        }
         #endregion
 
         #region Constructor

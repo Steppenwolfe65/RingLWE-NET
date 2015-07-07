@@ -63,18 +63,23 @@ namespace Test.Tests
 
             using (RLWESign sgn = new RLWESign(mpar))
             {
-                sgn.Initialize(akp);
+                sgn.Initialize(akp.PublicKey);
 
                 int sz = sgn.MaxPlainText;
                 byte[] data = new byte[200];
                 new VTDev.Libraries.CEXEngine.Crypto.Prng.CSPRng().GetBytes(data);
 
                 byte[] code = sgn.Sign(data, 0, data.Length);
+
+                sgn.Initialize(akp.PrivateKey);
                 if (!sgn.Verify(data, 0, data.Length, code))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
                 OnProgress(new TestEventArgs("Passed byte sign and verify"));
 
+                sgn.Initialize(akp.PublicKey);
                 code = sgn.Sign(new MemoryStream(data));
+
+                sgn.Initialize(akp.PrivateKey);
                 if (!sgn.Verify(new MemoryStream(data), code))
                     throw new Exception("EncryptionKey: private key comparison test failed!");
                 OnProgress(new TestEventArgs("Passed stream sign and verify"));

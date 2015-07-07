@@ -68,7 +68,7 @@ namespace Test.Tests
             // encrypt an array
             using (RLWEEncrypt cipher = new RLWEEncrypt(encParams))
             {
-                cipher.Initialize(true, new RLWEKeyPair(keyPair.PublicKey));
+                cipher.Initialize(keyPair.PublicKey);
                 data = new byte[cipher.MaxPlainText];
                 new CSPRng().GetBytes(data);
                 enc = cipher.Encrypt(data);
@@ -77,7 +77,7 @@ namespace Test.Tests
             // decrypt the cipher text
             using (RLWEEncrypt cipher = new RLWEEncrypt(encParams))
             {
-                cipher.Initialize(false, new RLWEKeyPair(keyPair.PrivateKey));
+                cipher.Initialize(keyPair.PrivateKey);
                 dec = cipher.Decrypt(enc);
             }
 
@@ -94,7 +94,7 @@ namespace Test.Tests
 
             using (RLWEEncrypt mpe = new RLWEEncrypt(Param))
             {
-                mpe.Initialize(true, akp);
+                mpe.Initialize(akp.PublicKey);
 
                 int sz = mpe.MaxPlainText;
                 byte[] data = new byte[sz];
@@ -102,7 +102,7 @@ namespace Test.Tests
 
                 enc = mpe.Encrypt(data);
 
-                mpe.Initialize(false, akp);
+                mpe.Initialize(akp.PrivateKey);
                 byte[] dec = mpe.Decrypt(enc);
 
                 if (!Compare.AreEqual(dec, data))

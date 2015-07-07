@@ -112,9 +112,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                 throw new CryptoAsymmetricException("RLWEParamSets:FromId", "OId is not a valid RLWE parameter id!", new ArgumentException());
 
             if (OId[3] == 1)
-                return (RLWEParameters)RLWEN256Q7681.Clone();
+                return (RLWEParameters)RLWEN256Q7681.DeepCopy();
             else if (OId[3] == 2)
-                return (RLWEParameters)RLWEN512Q12289.Clone();
+                return (RLWEParameters)RLWEN512Q12289.DeepCopy();
 
             throw new CryptoAsymmetricException("RLWEParamSets:FromId", "OId does not identify a valid param set!", new ArgumentOutOfRangeException());
         }
@@ -133,9 +133,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             switch (Name)
             {
                 case RLWEParamNames.N256Q7681:
-                    return (RLWEParameters)RLWEN256Q7681.Clone();
+                    return (RLWEParameters)RLWEN256Q7681.DeepCopy();
                 case RLWEParamNames.N512Q12289:
-                    return (RLWEParameters)RLWEN512Q12289.Clone();
+                    return (RLWEParameters)RLWEN512Q12289.DeepCopy();
                 default:
                     throw new CryptoAsymmetricException("RLWEParamSets:FromName", "The enumeration name is unknown!", new ArgumentException());
             }

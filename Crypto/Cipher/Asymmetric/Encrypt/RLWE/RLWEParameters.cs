@@ -68,6 +68,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// 
     /// <remarks>
     /// <description><h4>RLWE Parameter Description:</h4></description>
+    /// <para>The current implementation uses pre-generated lookup tables for speed, 
+    /// because of this only two base parameter sets are currently supported: N256Q7681 and N512Q12289.
+    /// </para>
     /// <list type="table">
     /// <item><description>OId - .</description></item>
     /// <item><description>N - The number of coefficients.</description></item>
@@ -103,6 +106,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         // The default sigma value
         private const double DEFAULT_SIGMA = 12.18;
         private const int OID_SIZE = 4;
+        private const string ALG_NAME = "RLWEParameters";
         #endregion
 
         #region Fields
@@ -117,6 +121,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: Parameters name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
+        }
+
         /// <summary>
         /// The digest engine powering the PBPrng used to generate a key; used with the RLWEKeyGenerator:GenerateKeyPair(byte[] Passphrase, byte[] Salt) method.
         /// </summary>
@@ -187,7 +199,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <param name="OId">Three bytes that uniquely identify the parameter set</param>
         /// <param name="Engine">The PRNG engine used to power SecureRandom</param>
         /// 
-        /// <exception cref="System.ArgumentException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if <c>N</c>, or <c>Q</c>, or the Oid are invalid</exception>
         public RLWEParameters(byte[] OId, Prngs Engine = Prngs.CTRPrng) :
             this(OId, DEFAULT_N, DEFAULT_Q, DEFAULT_SIGMA)
         {
@@ -206,7 +218,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <param name="Engine">The PRNG engine used to power Random Generation</param>
         /// <param name="PBDigest">The digest engine used to power a Passphrase Based Prng</param>
         /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if <c>N</c> or <c>Q</c> are invalid</exception>
+        /// <exception cref="CryptoAsymmetricException">Thrown if <c>N</c>, or <c>Q</c>, or the Oid are invalid</exception>
         public RLWEParameters(byte[] OId, int N, int Q, double Sigma, int MFP = DEFAULT_MFP, Prngs Engine = Prngs.CTRPrng, Digests PBDigest = Digests.SHA512)
         {
             if (OId.Length != OID_SIZE)
@@ -232,10 +244,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         }
 
         /// <summary>
-        /// Reads a parameter set from an input stream
+        /// Builds a parameter set from an encoded input stream
         /// </summary>
         /// 
         /// <param name="ParamStream">Stream containing a parameter set</param>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if the Stream is unreadable</exception>
         public RLWEParameters(Stream ParamStream)
         {
             try
@@ -264,7 +278,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         }
 
         /// <summary>
-        /// Reads a parameter set from a byte array
+        /// Builds a parameter set from an encoded byte array
         /// </summary>
         /// 
         /// <param name="ParamArray">Byte array containing a parameter set</param>
@@ -288,7 +302,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         #region Public Methods
         /// <summary>
-        /// Read a Public key from a byte array.
+        /// Read an encoded Parameter set from a byte array
         /// </summary>
         /// 
         /// <param name="ParamArray">The byte array containing the parameters</param>
@@ -296,43 +310,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <returns>An initialized RLWEParameters class</returns>
         public static RLWEParameters From(byte[] ParamArray)
         {
-            return From(new MemoryStream(ParamArray));
+            return new RLWEParameters(ParamArray);
         }
 
         /// <summary>
-        /// Read a Parameters file from a byte array.
+        /// Read an encoded Parameters set from a Stream
         /// </summary>
         /// 
-        /// <param name="ParamStream">The byte array containing the params</param>
+        /// <param name="ParamStream">The Stream containing the encoded Parameter set</param>
         /// 
         /// <returns>An initialized RLWEParameters class</returns>
         public static RLWEParameters From(Stream ParamStream)
         {
-            try
-            {
-                BinaryReader reader = new BinaryReader(ParamStream);
-                byte[] oid = reader.ReadBytes(OID_SIZE);
-                int n = reader.ReadInt32();
-                int q = reader.ReadInt32();
-                double s = reader.ReadDouble();
-                int mfp = reader.ReadInt32();
-                Prngs eng = (Prngs)reader.ReadInt32();
-                Digests dgt = (Digests)reader.ReadInt32();
-
-                return new RLWEParameters(oid, n, q, s, mfp, eng, dgt);
-            }
-            catch
-            {
-                throw;
-            }
+            return new RLWEParameters(ParamStream);
         }
 
         /// <summary>
-        /// Returns the current parameter set as an ordered byte array
+        /// Converts the current Parameter set to an encoded byte array
         /// </summary>
         /// 
         /// <returns>RLWEParameters as a byte array</returns>
         public byte[] ToBytes()
+        {
+            return ToStream().ToArray();
+        }
+
+        /// <summary>
+        /// Converts the current Parameter set to an encoded Stream
+        /// </summary>
+        /// 
+        /// <returns>RLWEParameters as a MemoryStream</returns>
+        public MemoryStream ToStream()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             writer.Write(_oId);
@@ -344,24 +352,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             writer.Write((int)_dgtEngineType);
             writer.Seek(0, SeekOrigin.Begin);
 
-            return ((MemoryStream)writer.BaseStream).ToArray();
+            return (MemoryStream)writer.BaseStream;
         }
 
         /// <summary>
-        /// Returns the current parameter set as a MemoryStream
+        /// Writes the RLWEParameters to a byte array
         /// </summary>
         /// 
-        /// <returns>RLWEParameters as a MemoryStream</returns>
-        public MemoryStream ToStream()
-        {
-            return new MemoryStream(ToBytes());
-        }
-
-        /// <summary>
-        /// Writes the parameter set to an output byte array
-        /// </summary>
-        /// 
-        /// <param name="Output">RLWEParameters as a byte array; can be initialized as zero bytes</param>
+        /// <param name="Output">Output array receiving the encoded Parameters</param>
         public void WriteTo(byte[] Output)
         {
             byte[] data = ToBytes();
@@ -370,10 +368,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         }
 
         /// <summary>
-        /// Writes the parameter set to an output byte array
+        /// Writes the RLWEParameters to a byte array
         /// </summary>
         /// 
-        /// <param name="Output">RLWEParameters as a byte array; array must be initialized and of sufficient length</param>
+        /// <param name="Output">Output array receiving the encoded Parameters</param>
         /// <param name="Offset">The starting position within the Output array</param>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if The output array is too small</exception>
@@ -387,10 +385,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         }
 
         /// <summary>
-        /// Writes the parameter set to an output stream
+        /// Writes the RLWEParameters to a Stream
         /// </summary>
         /// 
-        /// <param name="Output">Output stream</param>
+        /// <param name="Output">The Output stream receiving the encoded Parameters</param>
         public void WriteTo(Stream Output)
         {
             try
@@ -459,13 +457,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         #region IClone
         /// <summary>
-        /// Create a copy of this RLWEParameters instance
+        /// Create a shallow copy of this RLWEParameters instance
         /// </summary>
         /// 
-        /// <returns>RLWEParameters copy</returns>
+        /// <returns>The RLWEParameters copy</returns>
         public object Clone()
         {
             return new RLWEParameters(_oId, _N, _Q, _Sigma, _mFp, _rndEngineType, _dgtEngineType);
+        }
+
+        /// <summary>
+        /// Create a deep copy of this RLWEParameters instance
+        /// </summary>
+        /// 
+        /// <returns>The RLWEParameters copy</returns>
+        public object DeepCopy()
+        {
+            return new RLWEParameters(ToStream());
         }
         #endregion
 
@@ -489,7 +497,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                     _Q = 0;
                     _Sigma = 0;
                     _mFp = 0;
-                    _rndEngineType = 0;
+                    _rndEngineType = Prngs.CTRPrng;
+                    _dgtEngineType = Digests.SHA512;
+
                     if (_oId != null)
                     {
                         Array.Clear(_oId, 0, _oId.Length);

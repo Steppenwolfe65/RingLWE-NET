@@ -46,6 +46,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// </summary>
     public sealed class RLWEKeyPair : IAsymmetricKeyPair
     {
+        #region Constants
+        private const string ALG_NAME = "RLWEKeyPair";
+        #endregion
+
         #region Fields
         private bool _isDisposed = false;
         private IAsymmetricKey _publicKey;
@@ -53,6 +57,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Get: KeyPair name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
+        }
+
         /// <summary>
         /// Get: Returns the public key parameters
         /// </summary>

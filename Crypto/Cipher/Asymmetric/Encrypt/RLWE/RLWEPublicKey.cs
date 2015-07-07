@@ -46,6 +46,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// </summary>
     public class RLWEPublicKey : IAsymmetricKey
     {
+        #region Constants
+        private const string ALG_NAME = "RLWEPublicKey";
+        #endregion
+
         #region Fields
         private bool _isDisposed = false;
         // the length of the code
@@ -58,9 +62,17 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         #region Properties
         /// <summary>
+        /// Get: Private key name
+        /// </summary>
+        public string Name
+        {
+            get { return ALG_NAME; }
+        }
+
+        /// <summary>
         /// Get: Returns the A array
         /// </summary>
-        public byte[] A
+        internal byte[] A
         {
             get { return _A; }
         }
@@ -76,7 +88,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <summary>
         /// Get: Returns the P array
         /// </summary>
-        public byte[] P
+        internal byte[] P
         {
             get { return _P; }
         }
@@ -119,7 +131,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                 len = reader.ReadInt32();
                 _P = reader.ReadBytes(len);
             }
-            catch (IOException ex)
+            catch (Exception ex)
             {
                 throw new CryptoAsymmetricException("RLWEPublicKey:CTor", "The Public key could not be loaded!", ex);
             }
@@ -153,52 +165,44 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// Read a Public key from a byte array
         /// </summary>
         /// 
-        /// <param name="KeyArray">The byte array containing the key</param>
+        /// <param name="KeyArray">The byte array containing the encoded key</param>
         /// 
         /// <returns>An initialized RLWEPublicKey class</returns>
         public static RLWEPublicKey From(byte[] KeyArray)
         {
-            return From(new MemoryStream(KeyArray));
+            return new RLWEPublicKey(KeyArray);
         }
 
         /// <summary>
         /// Read a Public key from a stream
         /// </summary>
         /// 
-        /// <param name="KeyStream">The stream containing the key</param>
+        /// <param name="KeyStream">The stream containing the encoded key</param>
         /// 
         /// <returns>An initialized RLWEPublicKey class</returns>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if the stream can not be read</exception>
         public static RLWEPublicKey From(Stream KeyStream)
         {
-            try
-            {
-                BinaryReader reader = new BinaryReader(KeyStream);
-                int len = 0;
-                // num coeffs
-                int n = reader.ReadInt32();
-                // a poly
-                len = reader.ReadInt32();
-                byte[] a = reader.ReadBytes(len);
-                // p poly
-                len = reader.ReadInt32();
-                byte[] p = reader.ReadBytes(len);
-
-                return new RLWEPublicKey(n, a, p);
-            }
-            catch (Exception ex)
-            {
-                throw new CryptoAsymmetricException("RLWEPrivateKey:Ctor", ex.Message, ex);
-            }
+            return new RLWEPublicKey(KeyStream);
         }
 
         /// <summary>
-        /// Converts the key pair to a byte array
+        /// Converts the Public key to an encoded byte array
         /// </summary>
         /// 
-        /// <returns>The encoded key pair</returns>
+        /// <returns>The encoded RLWEPublicKey</returns>
         public byte[] ToBytes()
+        {
+            return ToStream().ToArray();
+        }
+
+        /// <summary>
+        /// Converts the Public key to an encoded MemoryStream
+        /// </summary>
+        /// 
+        /// <returns>The Public Key encoded as a MemoryStream</returns>
+        public MemoryStream ToStream()
         {
             BinaryWriter writer = new BinaryWriter(new MemoryStream());
             // num coeff
@@ -209,25 +213,16 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             // write 'p' poly
             writer.Write(_P.Length);
             writer.Write(_P);
+            writer.BaseStream.Seek(0, SeekOrigin.Begin);
 
-            return ((MemoryStream)writer.BaseStream).ToArray();
+            return (MemoryStream)writer.BaseStream;
         }
 
         /// <summary>
-        /// Returns the current key pair set as a MemoryStream
+        /// Writes encoded the RLWEPublicKey to an output byte array
         /// </summary>
         /// 
-        /// <returns>KeyPair as a MemoryStream</returns>
-        public MemoryStream ToStream()
-        {
-            return new MemoryStream(ToBytes());
-        }
-
-        /// <summary>
-        /// Writes the key pair to an output byte array
-        /// </summary>
-        /// 
-        /// <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
+        /// <param name="Output">The Public Key encoded as a byte array</param>
         public void WriteTo(byte[] Output)
         {
             byte[] data = ToBytes();
@@ -236,10 +231,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         }
 
         /// <summary>
-        /// Writes the key pair to an output byte array
+        /// Writes the encoded RLWEPublicKey to an output byte array
         /// </summary>
         /// 
-        /// <param name="Output">KeyPair as a byte array; can be initialized as zero bytes</param>
+        /// <param name="Output">The Public Key encoded to a byte array</param>
         /// <param name="Offset">The starting position within the Output array</param>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if the output array is too small</exception>
@@ -253,10 +248,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         }
 
         /// <summary>
-        /// Writes the key pair to an output stream
+        /// Writes the encoded RLWEPublicKey to an output stream
         /// </summary>
         /// 
-        /// <param name="Output">Output Stream</param>
+        /// <param name="Output">The Output Stream receiving the encoded Public Key</param>
+        /// 
+        /// <exception cref="CryptoAsymmetricException">Thrown if the key could not be written</exception>
         public void WriteTo(Stream Output)
         {
             try
@@ -264,9 +261,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                 using (MemoryStream stream = ToStream())
                     stream.WriteTo(Output);
             }
-            catch (IOException e)
+            catch (Exception ex)
             {
-                throw new CryptoAsymmetricException(e.Message);
+                throw new CryptoAsymmetricException("RLWEPublicKey:WriteTo", "The Public key could not be written!", ex);
             }
         }
         #endregion
@@ -320,13 +317,23 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         #region IClone
         /// <summary>
-        /// Create a copy of this RLWEPublicKey instance
+        /// Create a shallow copy of this RLWEPublicKey instance
         /// </summary>
         /// 
         /// <returns>RLWEPublicKey copy</returns>
         public object Clone()
         {
             return new RLWEPublicKey(_N, _A, _P);
+        }
+
+        /// <summary>
+        /// Create a deep copy of this RLWEPublicKey instance
+        /// </summary>
+        /// 
+        /// <returns>The RLWEPublicKey copy</returns>
+        public object DeepCopy()
+        {
+            return new RLWEPrivateKey(ToStream());
         }
         #endregion
 
