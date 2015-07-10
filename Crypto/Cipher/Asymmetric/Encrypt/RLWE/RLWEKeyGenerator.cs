@@ -6,6 +6,7 @@ using VTDev.Libraries.CEXEngine.Crypto.Digest;
 using VTDev.Libraries.CEXEngine.Crypto.Enumeration;
 using VTDev.Libraries.CEXEngine.Crypto.Prng;
 using VTDev.Libraries.CEXEngine.Exceptions;
+using VTDev.Libraries.CEXEngine.Utility;
 #endregion
 
 #region License Information
@@ -90,7 +91,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         #region Fields
         private bool _isDisposed;
         private RLWEParameters _rlweParams;
-        private IRandom _rngEngine;
+        private IRandom _rndEngine;
         #endregion
 
         #region Properties
@@ -108,30 +109,37 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// Initialize this class
         /// </summary>
         /// 
-        /// <param name="CiphersParams">The RLWEParameters instance containing the cipher settings</param>
+        /// <param name="CipherParams">The RLWEParameters instance containing the cipher settings</param>
+        /// <param name="Parallel">Use parallel processing when generating a key; set to false if using a passphrase type generator (default is true)</param>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if a Prng that requires pre-initialization is specified; (wrong constructor)</exception>
-        public RLWEKeyGenerator(RLWEParameters CiphersParams)
+        public RLWEKeyGenerator(RLWEParameters CipherParams, bool Parallel = true)
         {
-            _rlweParams = CiphersParams;
+            if (CipherParams.RandomEngine == Prngs.PBPrng)
+                throw new CryptoAsymmetricException("RLWEKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
-            if (CiphersParams.RandomEngine == Prngs.PBPrng)
-                throw new CryptoAsymmetricException("RLWEKeyGenerator:Ctor", "Passphrase based, digest, and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
-
-            _rngEngine = GetPrng(CiphersParams.RandomEngine);
+            ParallelUtils.ForceLinear = !Parallel;
+            _rlweParams = CipherParams;
+            _rndEngine = GetPrng(CipherParams.RandomEngine);
         }
 
         /// <summary>
-        /// Use an initialized prng to generate the key; use this constructor with an Rng that requires pre-initialization, 
-        /// i.e. PBPrng, DGCPrng, or CTRPrng
+        /// Use an initialized prng to generate the key; use this constructor with an Rng that requires pre-initialization, i.e. PBPrng
         /// </summary>
         /// 
-        /// <param name="CiphersParams">The RLWEParameters instance containing thecipher settings</param>
+        /// <param name="CipherParams">The RLWEParameters instance containing the cipher settings</param>
         /// <param name="RngEngine">An initialized Prng instance</param>
-        public RLWEKeyGenerator(RLWEParameters CiphersParams, IRandom RngEngine)
+        /// <param name="Parallel">Use parallel processing when generating a key; set to false if using a passphrase type generator (default is true)</param>
+        public RLWEKeyGenerator(RLWEParameters CipherParams, IRandom RngEngine, bool Parallel = true)
         {
-            _rlweParams = CiphersParams;
-            _rngEngine = RngEngine;
+            _rlweParams = CipherParams;
+            _rndEngine = RngEngine;
+
+            // passphrase gens must be linear processed
+            if (RngEngine.GetType().Equals(typeof(PBPRng)))
+                ParallelUtils.ForceLinear = true;
+            else
+                ParallelUtils.ForceLinear = !Parallel;
         }
 
         private RLWEKeyGenerator()
@@ -156,9 +164,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         public IAsymmetricKeyPair GenerateKeyPair()
         {
             if (_rlweParams.N == 512)
-                return new NTT512(_rngEngine).Generate();
+                return new NTT512(_rndEngine).Generate();
             else
-                return new NTT256(_rngEngine).Generate();
+                return new NTT256(_rndEngine).Generate();
         }
 
         /// <summary>
@@ -258,6 +266,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public void Dispose()
         {
+            ParallelUtils.ForceLinear = false;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -273,10 +282,10 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
                         _rlweParams.Dispose();
                         _rlweParams = null;
                     }
-                    if (_rngEngine != null)
+                    if (_rndEngine != null)
                     {
-                        _rngEngine.Dispose();
-                        _rngEngine = null;
+                        _rndEngine.Dispose();
+                        _rndEngine = null;
                     }
                 }
                 catch { }

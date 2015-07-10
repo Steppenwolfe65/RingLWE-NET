@@ -148,8 +148,8 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             }
         }
 
-                /// <summary>
-        /// Get: Cipher name
+        /// <summary>
+        /// Get: Signer name
         /// </summary>
         public string Name
         {
