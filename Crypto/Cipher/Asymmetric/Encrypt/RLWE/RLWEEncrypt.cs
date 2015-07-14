@@ -112,7 +112,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         private bool _isInitialized = false;
         private bool _isEncryption = false;
         private int _maxPlainText;
-        private int _maxCipherText;
         private IRandom _rndEngine;
         private int _N;
         private int _Q;
@@ -122,23 +121,29 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         #region Properties
         /// <summary>
-        /// Get: The maximum number of bytes the cipher can encrypt
+        /// Get: The cipher is initialized for encryption
         /// </summary>
-        /// 
-        /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized</exception>
-        public int MaxCipherText
+        public bool IsEncryption
         {
-            get 
+            get
             {
-                if (_maxCipherText == 0 || !_isInitialized)
-                    throw new CryptoAsymmetricException("RLWEEncrypt:MaxCipherText", "The cipher must be initialized before size can be calculated!", new InvalidOperationException());
+                if (!_isInitialized)
+                    throw new CryptoAsymmetricException("RLWEEncrypt:IsEncryption", "The cipher must be initialized before state can be determined!", new InvalidOperationException());
 
-                return _maxCipherText; 
+                return _isEncryption;
             }
         }
 
         /// <summary>
-        /// Get: The maximum number of bytes the cipher can decrypt
+        /// Get: The cipher has been initialized with a key
+        /// </summary>
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+        }
+
+        /// <summary>
+        /// Get: The maximum number of bytes the cipher can encrypt
         /// </summary>
         /// 
         /// <exception cref="CryptoAsymmetricException">Thrown if cipher has not been initialized</exception>
@@ -177,15 +182,9 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             _mFp = CipherParams.MFP;
 
             if (CipherParams.N == 256)
-            {
                 _maxPlainText = 32;
-                _maxCipherText = 32;
-            }
             else
-            {
                 _maxPlainText = 64;
-                _maxCipherText = 64;
-            }
         }
 
         /// <summary>
@@ -392,8 +391,12 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             {
                 try
                 {
+                    if (_rndEngine != null)
+                    {
+                        _rndEngine.Dispose();
+                        _rndEngine = null;
+                    }
                     _maxPlainText = 0;
-                    _maxCipherText = 0;
                 }
                 catch { }
 

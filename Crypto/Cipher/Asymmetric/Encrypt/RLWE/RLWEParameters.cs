@@ -273,7 +273,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             }
             catch (Exception ex)
             {
-                throw new CryptoAsymmetricException("NTRUParameters:CTor", "The stream could not be read!", ex);
+                throw new CryptoAsymmetricException("RLWEParameters:CTor", "The stream could not be read!", ex);
             }
         }
 

@@ -114,6 +114,14 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
 
         #region Properties
         /// <summary>
+        /// Get: The cipher has been initialized with a key
+        /// </summary>
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+        }
+
+        /// <summary>
         /// Get: This class is initialized for Signing with the Public key
         /// </summary>
         /// 
@@ -213,7 +221,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// Get the signing code for a stream
         /// </summary>
         /// 
-        /// <param name="InputStream">The stream contining the data</param>
+        /// <param name="InputStream">The stream containing the data</param>
         /// 
         /// <returns>The encrypted hash code</returns>
         /// 

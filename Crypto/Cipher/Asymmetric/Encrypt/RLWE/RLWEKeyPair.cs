@@ -138,7 +138,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// <para>Note: both keys must be present in the stream; ordered Public, Private.</para>
         /// </summary>
         /// 
-        /// <param name="ParamArray">Byte array containing a parameter set</param>
+        /// <param name="KeyArray">An byte array containing an encoded key pair</param>
         public RLWEKeyPair(byte[] KeyArray) :
             this(new MemoryStream(KeyArray))
         {

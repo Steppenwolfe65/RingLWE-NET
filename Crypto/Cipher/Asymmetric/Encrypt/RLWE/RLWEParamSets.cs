@@ -49,7 +49,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
     /// <list type="bullet">
     /// <item><description>A Parameter Set OId (uniquely identifies the parameter set), is always the first four bytes of a serialized parameter set.</description></item>
     /// <item><description>The OId format is ordered as: <c>Family</c>, <c>Set</c>, <c>SubSet</c>, and <c>Unique</c>.</description></item>
-    /// <item><description>A Ring-LWE parameters Family designator (first byte) is always the value <c>3</c>, and corresponds to its entry in the <see cref="AsymmetricEngines"/> enumeration.</description></item>
+    /// <item><description>A Ring-LWE parameters Family designator (first byte) is always the value <c>3</c>, and corresponds to its entry in the AsymmetricEngines enumeration.</description></item>
     /// <item><description>The remaining bytes can be a unique designator.</description></item>
     /// </list>
     /// 

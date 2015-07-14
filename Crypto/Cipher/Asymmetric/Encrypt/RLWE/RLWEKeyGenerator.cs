@@ -92,6 +92,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         private bool _isDisposed;
         private RLWEParameters _rlweParams;
         private IRandom _rndEngine;
+        private bool _frcLinear = false;
         #endregion
 
         #region Properties
@@ -118,6 +119,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             if (CipherParams.RandomEngine == Prngs.PBPrng)
                 throw new CryptoAsymmetricException("RLWEKeyGenerator:Ctor", "Passphrase based digest and CTR generators must be pre-initialized, use the other constructor!", new ArgumentException());
 
+            _frcLinear = ParallelUtils.ForceLinear;
             ParallelUtils.ForceLinear = !Parallel;
             _rlweParams = CipherParams;
             _rndEngine = GetPrng(CipherParams.RandomEngine);
@@ -134,6 +136,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         {
             _rlweParams = CipherParams;
             _rndEngine = RngEngine;
+            _frcLinear = ParallelUtils.ForceLinear;
 
             // passphrase gens must be linear processed
             if (RngEngine.GetType().Equals(typeof(PBPRng)))
@@ -266,7 +269,7 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
         /// </summary>
         public void Dispose()
         {
-            ParallelUtils.ForceLinear = false;
+            ParallelUtils.ForceLinear = _frcLinear;
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -277,11 +280,6 @@ namespace VTDev.Libraries.CEXEngine.Crypto.Cipher.Asymmetric.Encrypt.RLWE
             {
                 try
                 {
-                    if (_rlweParams != null)
-                    {
-                        _rlweParams.Dispose();
-                        _rlweParams = null;
-                    }
                     if (_rndEngine != null)
                     {
                         _rndEngine.Dispose();
