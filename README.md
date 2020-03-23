@@ -3,6 +3,9 @@ An implementation of Ring-LWE in C#
 
 Details:
 
+This repository is obsolete. Please refer to the CEX++ library for the current version (NewHope PQ R2).
+This implementation remains online only for historical purposes.
+
 An implementation based on the description in the paper 'Efficient Software Implementation of Ring-LWE Encryption' 
 https://eprint.iacr.org/2014/725.pdf and accompanying Github project: https://github.com/ruandc/Ring-LWE-Encryption
 
